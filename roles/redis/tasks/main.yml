@@ -1,0 +1,50 @@
+---
+# The playbook for redis
+
+- name: check redis
+  command: "{{ install_path }}/redis/bin/redis-server -v"
+  register: redis_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: redis
+
+- name: rsync redis
+  synchronize: src={{ package_path }}/redis/redis dest={{ install_path}}
+  when: redis_result is defined and redis_result.rc !=0 or state == "upgrade"
+  tags: redis
+
+- name: deploy redis init script
+  template: src=redis dest=/etc/init.d/redis mode=0755
+  when: state != "absent"
+  tags: redis
+
+- name: deploy redis conf
+  template: src=redis.conf dest={{ install_path }}/redis/redis.conf
+  when: state != "absent"
+  tags: redis
+
+- name: start redis service
+  service: name=redis enabled=yes state=started
+  when: state != "absent"
+  tags: redis
+
+- name: stop redis service
+  service: name=redis enabled=no state=stopped
+  when: state == "absent" 
+  ignore_errors: true
+  tags: redis
+
+- name: rm redis init script
+  file: dest=/etc/init.d/redis state=absent
+  when: state == "absent" 
+  tags: redis
+
+- name: rm {{ install_path }}/redis
+  file: dest={{ install_path }}/redis state=absent
+  when: state == "absent"
+  tags: redis
+
+- name: rm {{ db_path }}/redis
+  file: dest={{ db_path }}/redis state=absent
+  when: state == "absent"
+  tags: redis

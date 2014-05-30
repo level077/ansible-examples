@@ -1,0 +1,7 @@
+---
+#default variables
+
+package_path: /etc/ansible/packages
+
+#install or uninstall(choice:presnet,latest,absent)
+state: present

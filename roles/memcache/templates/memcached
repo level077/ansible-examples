@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# memcached - memcached is a high-performance, distributed memory object caching system, 
+# generic in nature, but intended for use in speeding up dynamic web applications by alleviating database load.
+#
+#
+# chkconfig:	345 44 56 
+#
+# description:  memcached daemon server 
+# processname:  memcached 
+# config: /etc/memcached autoreload
+#
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+#ETH1_IP=`ifconfig | awk -F '[: ]+' '/addr:10\./ {print $4}'`
+ARGS="-d -m 2048 -c 4096 -p {{ port }} -u nobody"
+[ -f /usr/local/bin/memcached ] || exit 1
+
+lockfile=/var/lock/subsys/memcached_{{ port }}
+RETVAL=0
+start() {
+	echo -n $"Starting memcached: "
+	daemon /usr/local/bin/memcached $ARGS
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch "$lockfile"
+	echo
+}
+
+stop() {
+	echo -n $"Shutting down memcached: "
+        pid=$(ps xau | grep -v grep | grep memcached | grep {{ port }} | awk '{print $2}')
+	#killproc /usr/local/bin/memcached
+	kill -9 $pid
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && rm -f "$lockfile"
+	echo
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop) 
+	stop
+	;;
+  restart|force-reload)
+	restart
+	;;
+  reload)
+	;;
+  condrestart)
+	[ -f "$lockfile" ] && restart
+	;;
+  status)
+	if [ -f $lockfile ]; then
+		echo $"memcached is running."
+		RETVAL=0
+	else
+		echo $"memcached is not running."
+		RETVAL=3
+	fi
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+	exit 1
+esac
+
+exit $RETVAL

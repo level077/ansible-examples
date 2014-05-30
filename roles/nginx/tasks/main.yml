@@ -1,0 +1,57 @@
+---
+# The playbook for nginx
+
+- name: check nginx
+  shell: "{{ install_path }}/nginx/sbin/nginx -v"
+  register: nginx_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: nginx
+
+- name: rsync nginx
+  synchronize: src={{ package_path }}/nginx/nginx dest=/tmp
+  when: nginx_result is defined and nginx_result.stderr.find('nginx version') == -1 or state == "upgrade" 
+  tags: nginx
+
+- name: install nginx
+  shell: "chdir=/tmp/nginx /bin/sh /tmp/nginx/install {{ install_path }}"
+  when: nginx_result is defined and nginx_result.stderr.find('nginx version') == -1 or state == "upgrade"
+  async: 45
+  poll: 5
+  tags: nginx
+
+- name: deploy nginx.conf
+  synchronize: src={{ package_path }}/nginx/nginx.conf dest={{ install_path }}/nginx/conf/nginx.conf
+  when: state != "absent"
+  tags: nginx
+
+- name: deploy nginx init script
+  template: src=nginx dest=/etc/init.d/nginx mode=0755
+  when: state != "absent"
+  tags: nginx
+
+- name: start nginx service
+  service: name=nginx enabled=yes state=started
+  when: state != "absent"
+  tags: nginx
+
+- name: stop nginx service
+  service: name=nginx enabled=no state=stopped
+  when: state == "absent" 
+  ignore_errors: true
+  tags: nginx
+
+- name: uninstall nginx
+  file: dest={{ install_path }}/nginx state=absent
+  when: state == "absent"
+  tags: nginx
+
+- name: uninstall luajit
+  file: dest={{ install_path }}/luajit state=absent
+  when: state == "absent"
+  tags: nginx
+
+- name: rm nginx init script
+  file: dest=/etc/init.d/nginx state=absent
+  when: state == "absent" 
+  tags: nginx

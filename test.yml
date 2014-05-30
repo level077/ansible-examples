@@ -1,0 +1,15 @@
+---
+
+- hosts: test
+  roles:
+    - common
+    - { role: ganglia-gmond, state: absent}
+    - { role: ganglia-gmetad, state: absent}
+    - { role: jdk, install_path: /usr/local, jdk_file: jdk1.6.0_32, state: absent }
+    - { role: nginx, install_path: /usr/local/app, state: absent } 
+    - { role: tomcat,port: 8311,shutdown_port: 18311, state: absent }
+    - { role: mongodb, port: 28018, install_path: /usr/local/mongodb, db_path: /opt, state: absent}
+    - { role: redis, install_path: /usr/local/app, db_path: /opt, state: absent}
+    - { role: memcache, port: 11211, state: absent}
+    - { role: memcache, port: 11212, state: absent}
+    - { role: mysql, port: 3306, server_id: 1, state: absent}

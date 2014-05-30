@@ -1,0 +1,23 @@
+---
+# The playbook for jdk deploy
+
+- name: Deploy jdk
+  synchronize: src={{ package_path }}/jdk/{{ jdk_file }} dest={{ jdk_path }}
+  #copy: src=jdk1.6.0_32 dest={{ jdk_path }}
+  when: state != "absent"
+  tags: jdk
+
+- name: ln -s {{ jdk_path }}/{{ jdk_file }} {{ jdk_path }}/jdk
+  file: src={{ jdk_path }}/{{ jdk_file }} dest={{ jdk_path }}/jdk state=link
+  when: state != "absent"
+  tags: jdk
+
+- name: rm jdk symbolic link
+  file: dest={{ jdk_path }}/jdk state=absent
+  when:  state  == "absent"
+  tags: jdk
+
+- name: rm jdk
+  file: dest={{ jdk_path }}/{{ jdk_file }} state=absent
+  when:  state == "absent"
+  tags: jdk

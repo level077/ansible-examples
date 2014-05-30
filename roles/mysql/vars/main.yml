@@ -1,0 +1,19 @@
+---
+#default variables
+
+package_path: /etc/ansible/packages
+
+#nginx install path of remote server 
+install_path: /usr/local/app
+
+#install or uninstall(choices: presnet,upgrade,absent. default:present)
+state: present
+
+#mysql port
+port: 3306
+
+#mysql db path
+db_path: /opt
+
+#server_id
+server_id: 1

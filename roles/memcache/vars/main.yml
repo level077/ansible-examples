@@ -1,0 +1,10 @@
+---
+#default variables
+
+package_path: /etc/ansible/packages
+
+#install or uninstall(choices: presnet,upgrade,absent. default:present)
+state: present
+
+#port
+port: 11211

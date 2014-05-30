@@ -1,0 +1,30 @@
+---
+# default variables
+
+#server.xml
+maxThreads: 1000
+minSpareThreads: 400
+port: 8310
+protocol: org.apache.coyote.http11.Http11NioProtocol
+connectionTimeout: 20000
+acceptCount: 2500
+shutdown_port: 18310
+
+#catalina.sh
+Xms: 2048m
+Xmx: 2048m
+Xmn: 128m
+PermSize: 64m
+MaxPermSize: 256m
+
+#tomcat install path
+tomcat_path: /usr/local/tomcat
+
+#package path
+package_path: /etc/ansible/packages 
+
+#init script dir
+init_path: /etc/init.d
+
+#install or uninstall(choices:present,absent.default:absent)
+state: present

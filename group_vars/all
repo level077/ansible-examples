@@ -1,0 +1,2 @@
+#package_path for rsync
+package_path: /etc/ansible/packages
