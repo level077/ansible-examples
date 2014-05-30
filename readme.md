@@ -3,7 +3,7 @@ Description
 
 ansible-examples 将平时常用的软件写成ansible roles。
 * 新建了个package目录，用于存放文件。不把文件存放在roles的files目录中，原因是使用过程中发现copy模块传输速度非常慢，且经常遇到selinux问题，即使安装了对应的包也无法解决。
-* 每个role都提供了安装，升级，及卸载的功能，对应的参数是present,uograde,absent.具体使用可以查看test.yml。如果打成rpm的包，就不用写的这么复杂了。
+* 每个role都提供了安装，升级，及卸载的功能，对应的参数是present,upgrade,absent.具体使用可以查看test.yml。如果打成rpm的包，就不用写的这么复杂了。
 * 对于mongodb mysql tomcat这些都区分了端口。满足有单机多实例的需求。
 
 Roles
