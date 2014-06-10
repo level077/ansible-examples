@@ -82,6 +82,15 @@ tomcat
   * shutdown_port: server.xml中的关闭监听端口
   * 还有很多参数，跟jvm设置有关，具体查看vars/main.yml
 
+nrpe
+---------
+* yum安装nrpe
+* 参数
+  * state: 安装模式，默认是present，还可以选择upgrade，absent
+  * allowed_hosts: nrpe配置项，nrpe.cfg模板中使用
+* 模板 
+  nrpe.cfg: 根据ansible_facts添加磁盘监控，及设置allowed_hosts
+
 Usage
 ==========
 ansible-playbook -i hosts test.yml [-t tags] 

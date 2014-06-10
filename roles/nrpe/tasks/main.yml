@@ -1,0 +1,19 @@
+---
+# The playbook for nrpe
+
+- name: yum install nrpe
+  yum: name={{ item }} state={{ state }} 
+  with_items:
+    - nrpe
+    - nagios-plugins-all  
+  tags: nrpe
+
+- name: nrpe config
+  template: src=nrpe.cfg dest=/etc/nagios/nrpe.cfg
+  when: state != "absent"
+  tags: nrpe 
+
+- name: start nrpe
+  service: name=nrpe state=started enabled=yes
+  when: state != "absent"
+  tags: nrpe
