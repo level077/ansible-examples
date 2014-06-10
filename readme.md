@@ -89,7 +89,7 @@ nrpe
   * state: 安装模式，默认是present，还可以选择upgrade，absent
   * allowed_hosts: nrpe配置项，nrpe.cfg模板中使用
 * 模板 
-  nrpe.cfg: 根据ansible_facts添加磁盘监控，及设置allowed_hosts
+  * nrpe.cfg: 根据ansible_facts添加磁盘监控，及设置allowed_hosts
 
 Usage
 ==========
