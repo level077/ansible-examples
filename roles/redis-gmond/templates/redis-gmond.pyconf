@@ -1,0 +1,29 @@
+modules {
+  module {
+    name = "redis_{{ port }}"
+    language = "python"
+    param host { value = "{{ host }}" }
+    param port { value = {{ port }} }
+    /* param auth { value = "passwordhere" } */
+  }
+}
+collection_group {
+  collect_every = 10
+  time_threshold = 60
+  metric { name = "{{ host }}_{{ port }}_connected_clients" }
+  metric { name = "{{ host }}_{{ port }}_connected_slaves" }
+  metric { name = "{{ host }}_{{ port }}_blocked_clients" }
+  metric { name = "{{ host }}_{{ port }}_used_memory" }
+  metric { name = "{{ host }}_{{ port }}_rdb_changes_since_last_save" }
+  metric { name = "{{ host }}_{{ port }}_rdb_bgsave_in_progress" }
+  metric { name = "{{ host }}_{{ port }}_master_sync_in_progress" }
+  metric { name = "{{ host }}_{{ port }}_master_link_status" }
+  metric { name = "{{ host }}_{{ port }}_total_connections_received" }
+  metric { name = "{{ host }}_{{ port }}_instantaneous_ops_per_sec" }
+  metric { name = "{{ host }}_{{ port }}_total_commands_processed" }
+  metric { name = "{{ host }}_{{ port }}_expired_keys" }
+  metric { name = "{{ host }}_{{ port }}_pubsub_channels" }
+  metric { name = "{{ host }}_{{ port }}_pubsub_patterns" }
+  metric { name = "{{ host }}_{{ port }}_master_last_io_seconds_ago" }
+  metric { name = "{{ host }}_{{ port }}_{{ db }}" }
+}

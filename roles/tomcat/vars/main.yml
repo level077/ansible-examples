@@ -9,6 +9,7 @@ protocol: org.apache.coyote.http11.Http11NioProtocol
 connectionTimeout: 20000
 acceptCount: 2500
 shutdown_port: 18310
+context: [{"webapp":"osm-user.war","path":"/osm-user"},{"webapp":"osm-video","path":"/osm-video"}]
 
 #catalina.sh
 Xms: 2048m
@@ -18,7 +19,13 @@ PermSize: 64m
 MaxPermSize: 256m
 
 #tomcat install path
-tomcat_path: /usr/local/tomcat
+install_path: /usr/local
+
+#war dir
+war_path: /usr/local/apps
+
+#JAVA_HOME
+java_home: /usr/local/jdk
 
 #package path
 package_path: /etc/ansible/packages 

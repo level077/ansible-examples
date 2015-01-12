@@ -1,5 +1,13 @@
 ---
-# The playbook for system init
+# The role for  ganglia-gmond
+# 
+# Usage: { role: ganglia-gmond, cluster_name: test, mcast_ip: 239.2.11.71 }
+#
+
+- name: stop gmond
+  service: name=gmond state=stopped
+  when: state == "absent"
+  tags: ganglia-gmond
 
 - name: yum install ganglia-gmond
   yum: name={{ item }} state={{ state }} 
@@ -7,6 +15,13 @@
     - ganglia-gmond
     - ganglia-gmond-python
   tags: gmond
+
+- name: gmond.conf
+  template: src=gmond.conf dest=/etc/ganglia/gmond.conf
+  notify: restart gmond
+  when: state != "absent"
+  tags: ganglia-gmond
+
 
 - name: start gmond
   service: name=gmond state=started enabled=yes

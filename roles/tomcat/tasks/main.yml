@@ -1,8 +1,11 @@
 ---
-# The playbook for tomcat deploy
+# The role for tomcat
+#
+# Usage: { role: tomcat, install_path: /usr/local, port: 8100, shutdown_port: 18100, Xmn: 875m, Xms: 3072m, Xmx: 3072m, PermSize: 128m, MaxPermSize: 128m, context: [{"webapp":"cms.war","path":"/cms"}],war_path: /usr/local/apps }
+#
 
-- name: Create tomcat dir  
-  file: path={{ tomcat_path }} state=directory
+- name: Create {{ install_path }}/tomcat dir
+  file: path={{ install_path }} state=directory
   when: state != "absent"
   tags: tomcat
 
@@ -12,39 +15,47 @@
   tags: tomcat
 
 - name: Create tomcat_{{ port }} dir
-  file: path={{ tomcat_path }}/tomcat_{{ port }} state=directory
+  file: path={{ install_path }}/tomcat/tomcat_{{ port }} state=directory
   when: state != "absent"
   tags: tomcat
 
 - name: check tomcat
-  command: "ls {{ tomcat_path }}/tomcat_{{ port }}/bin/catalina.sh"
+  command: "ls {{ install_path }}/tomcat/tomcat_{{ port }}/bin/catalina.sh"
   register: tomcat_result
   ignore_errors: true
   when: state != "absent"
   tags: tomcat
 
 - name: deploy tomcat_{{ port }}
-  #copy: src=tomcat_8310 dest=/tmp/tomcat 
-  synchronize: src={{ package_path }}/tomcat/tomcat_8310/ dest={{ tomcat_path }}/tomcat_{{ port }}/ 
+  synchronize: src={{ package_path }}/tomcat/tomcat7/ dest={{ install_path }}/tomcat/tomcat_{{ port }}/ 
   when: tomcat_result is defined and tomcat_result.rc !=0 or state == "upgrade"
   tags: tomcat
 
 - name: deploy server.xml
-  template: src=server.xml dest={{ tomcat_path }}/tomcat_{{ port }}/conf/server.xml
+  template: src=server.xml dest={{ install_path }}/tomcat/tomcat_{{ port }}/conf/server.xml
   when: state != "absent"
   tags: tomcat
 
 - name: deploy Catalina.sh
-  template: src=catalina.sh dest={{ tomcat_path }}/tomcat_{{ port }}/bin/catalina.sh mode=0755
+  template: src=catalina.sh dest={{ install_path }}/tomcat/tomcat_{{ port }}/bin/catalina.sh mode=0755
   when: state != "absent"
   tags: tomcat
 
 - name: deploy tomcat.sh
-  synchronize: src={{ package_path }}/tomcat/tomcat.sh dest={{ init_path }}/tomcat.sh
+  template: src=tomcat.sh dest={{ init_path }}/tomcat.sh
   when: state != "absent"
   tags: tomcat
 
+- name: Create {{ war_path }} dir
+  file: path={{ war_path }} state=directory
+  when: state != "absent"
+  tags: tomcat
+
+- name: set tomcat crontab
+  cron: name="tomcat log" minute=00 hour=03 job="find {{ install_path }}/tomcat/*/logs/*  -type f -mtime +7  -exec rm {} \; > /dev/null 2>&1" backup=yes state=present
+  tags: tomcat
+
 - name: rm tomcat_{{ port }}
-  file: dest={{ tomcat_path }}/tomcat_{{ port }} state=absent
+  file: dest={{ install_path }}/tomcat/tomcat_{{ port }} state=absent
   when: state == "absent"
   tags: tomcat

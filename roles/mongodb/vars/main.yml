@@ -4,7 +4,7 @@
 package_path: /etc/ansible/packages
 
 #nginx install path of remote server 
-install_path: /usr/local/app
+install_path: /usr/local
 
 #install or uninstall(choices: presnet,upgrade,absent. default:present)
 state: present
@@ -13,4 +13,10 @@ state: present
 port: 27017
 
 #mongodb db path
-db_path: /opt
+#db_path: /opt
+
+#replSet: test
+
+#bind_ip: 127.0.0.1
+
+

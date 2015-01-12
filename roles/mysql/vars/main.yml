@@ -17,3 +17,9 @@ db_path: /opt
 
 #server_id
 server_id: 1
+
+#innodb_buffer_pool_size
+innodb_buffer_pool_size: 40G
+
+#mysql_file
+mysql_file: mysql_5.6.20

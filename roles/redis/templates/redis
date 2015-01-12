@@ -11,14 +11,14 @@
 . /etc/rc.d/init.d/functions
 
 prog="redis"
-REDISPORT=6379
-EXEC={{ install_path }}/redis/bin/redis-server
-CLIEXEC={{ install_path }}/redis/bin/redis-cli
-DATADIR={{ db_path }}/redis
+REDISPORT={{ port }}
+EXEC=/usr/local/bin/redis-server
+CLIEXEC=/usr/local/bin/redis-cli
+DATADIR={{ db_path }}/redis/{{ port }}
 [ ! -d $DATADIR ] && mkdir -p $DATADIR
 
-PIDFILE=/var/run/redis.pid
-CONF="{{ install_path }}/redis/redis.conf"
+PIDFILE=/var/run/redis_{{ port }}.pid
+CONF="/etc/redis/{{ port }}/redis.conf"
 
 start() {
 	echo -n $"Starting $prog: "

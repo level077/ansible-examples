@@ -1,0 +1,34 @@
+---
+# The role for redis-gmond
+#
+# Usage: { role: redis-gmond, port: 6379, host: localhost, }
+#
+
+- name: redis_{{ port }}.py
+  template: src=redis-gmond.py dest=/usr/lib64/ganglia/python_modules/redis_{{ port }}.py
+  notify: restart gmond
+  when: state != "absent"
+  tags: redis-gmond
+
+- name: redis_{{ port }}.pyconf
+  template: src=redis-gmond.pyconf dest=/etc/ganglia/conf.d/redis_{{ port }}.pyconf
+  notify: restart gmond
+  when: state != "absent"
+  tags: redis-gmond
+
+- name: start gmond
+  service: name=gmond state=started enabled=yes
+  when: state != "absent"
+  tags: redis-gmond
+
+- name: remove redis_{{ port }}.py
+  file: src=/usr/lib64/ganglia/python_modules/redis_{{ port }}.py state=absent
+  notify: restart gmond
+  when: state == "absent"
+  tags: redis-gmond
+
+- name: remove redis_{{ port }}.pyconf
+  file: src=/etc/ganglia/conf.d/redis_{{ port }}.pyconf state=absent
+  notify: restart gmond
+  when: state == "absent"
+  tags: redis-gmond

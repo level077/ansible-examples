@@ -1,0 +1,34 @@
+---
+# The role for mongo-gmond
+#
+# Usage: { role: mongo-gmond, port: 27017, host: localhost, mongo: /usr/local/mongodb/bin/mongo }
+#
+
+- name: mongodb.pyconf
+  template: src=mongodb.pyconf dest=/etc/ganglia/conf.d/mongodb_{{port}}.pyconf
+  notify: restart gmond
+  when: state != "absent"
+  tags: mongo-gmond
+
+- name: mongodb.py
+  template: src=mongodb.py dest=/usr/lib64/ganglia/python_modules/mongodb_{{port}}.py
+  notify: restart gmond
+  when: state != "absent"
+  tags: mongo-gmond
+
+- name: start gmond
+  service: name=gmond state=started enabled=yes
+  when: state != "absent"
+  tags: mongo-gmond
+
+- name: remove mongodb_{{ port }}.py
+  file: src=/usr/lib64/ganglia/python_modules/mongodb_{{ port }}.py state=absent
+  notify: restart gmond
+  when: state == "absent"
+  tags: mongo-gmond
+
+- name: remove mongodb_{{ port }}.pyconf
+  file: src=/etc/ganglia/conf.d/mongodb_{{ port }}.pyconf state=absent
+  notify: restart gmond
+  when: state == "absent"
+  tags: mongo-gmond

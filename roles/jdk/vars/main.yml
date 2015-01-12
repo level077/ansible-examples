@@ -2,7 +2,7 @@
 # default variables
 
 #jdk install path of remote server
-jdk_path: /usr/local
+install_path: /usr/local
 
 #jdk version
 jdk_file: jdk1.6.0_32

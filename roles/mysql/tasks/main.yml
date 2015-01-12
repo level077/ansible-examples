@@ -1,5 +1,8 @@
 ---
-# The playbook for mysql
+# The role for mysql
+#
+# Usage: { role: mysql, install_path: /usr/local, mysql_file: mysql_5.6.20, port: 3306, server_id: 1, innodb_buffer_pool_size: 40G, db_path: /opt }
+#
 
 - name: check mysql
   command: "{{ install_path }}/mysql/bin/mysql --version"
@@ -8,14 +11,27 @@
   ignore_errors: true
   tags: mysql
 
-- name: useradd mysql
-  user: name=mysql createhome=no
+- name: install innotop
+  yum: name={{ item }} state=present
+  with_items:
+  - perl-IO-Socket-SSL
+  - innotop
   when: state != "absent"
   tags: mysql
 
-- name: rsync mysql
-  synchronize: src={{ package_path }}/mysql/mysql dest={{ install_path }}
+- name: useradd mysql
+  user: name=mysql createhome=no shell=/sbin/nologin
+  when: state != "absent"
+  tags: mysql
+
+- name: rsync {{ package_path }}/mysql/{{ mysql_file }} to {{ install_path }}
+  synchronize: src={{ package_path }}/mysql/{{ mysql_file }} dest={{ install_path }}
   when: mysql_result is defined and mysql_result.rc != 0 or state == "upgrade"
+  tags: mysql
+
+- name: ln -s {{ install_path }}/{{ mysql_file }} { install_path }}/mysql
+  file: src={{ install_path }}/{{ mysql_file }} dest={{ install_path }}/mysql state=link
+  when: state != "absent"
   tags: mysql
 
 - name: create /etc/mysql/{{ port }} dir for my.cnf
@@ -40,13 +56,8 @@
   ignore_errors: true
   tags: mysql
 
-- name: create {{ db_path }}/mysql
-  file: dest={{ db_path }}/mysql state=directory owner=mysql group=mysql recurse=yes
-  when: state != "absent"
-  tags: mysql
-
 - name: create {{ db_path }}/mysql/{{ port }}
-  file: dest={{ db_path }}/mysql/{{ port }} state=directory owner=mysql group=mysql recurse=yes
+  file: dest={{ db_path }}/mysql state=directory owner=mysql group=mysql recurse=yes
   when: state != "absent"
   tags: mysql
 

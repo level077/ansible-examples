@@ -1,0 +1,39 @@
+---
+# The role for rt-gmond
+#
+# Usage: {role: rt-gmond, port: 3306 }
+# 
+
+- name: rsync tcprstat
+  synchronize: src={{ package_path }}/rt-gmond/tcprstat dest=/usr/bin/
+  when: state != "absent"
+  tags: rt-gmond
+
+- name: rt.pyconf
+  template: src=rt.pyconf dest=/etc/ganglia/conf.d/rt_{{port}}.pyconf
+  notify: restart gmond
+  when: state != "absent"
+  tags: rt-gmond
+
+- name: rt.py
+  template: src=rt.py dest=/usr/lib64/ganglia/python_modules/rt_{{port}}.py
+  notify: restart gmond
+  when: state != "absent"
+  tags: rt-gmond
+
+- name: start gmond
+  service: name=gmond state=started enabled=yes
+  when: state != "absent"
+  tags: rt-gmond
+
+- name: remove rt_{{ port }}.py
+  file: src=/usr/lib64/ganglia/python_modules/rt_{{ port }}.py state=absent
+  notify: restart gmond
+  when: state == "absent"
+  tags: rt-gmond
+
+- name: remove rt_{{ port }}.pyconf
+  file: src=/etc/ganglia/conf.d/rt_{{ port }}.pyconf state=absent
+  notify: restart gmond
+  when: state == "absent"
+  tags: rt-gmond
