@@ -1,0 +1,52 @@
+---
+# The playbook for mysql_monitor
+
+- name: rsync {{ package_path }}/mysql_monitor
+  synchronize: src={{ package_path }}/mysql_monitor/{{ item }} dest=/tmp
+  with_items:
+    - percona-nagios-plugins-1.1.4-1.noarch.rpm
+    - percona-toolkit-2.2.12-1.noarch.rpm
+  when: state != "absent"
+  tags: mysql_monitor
+
+- name: install percona-nagios rpm
+  yum: name={{ item }} state={{ state }}
+  with_items:
+    - /tmp/percona-nagios-plugins-1.1.4-1.noarch.rpm
+    - /tmp/percona-toolkit-2.2.12-1.noarch.rpm
+  tags: mysql_monitor
+
+- name: ganglia mysql_{{ port }} py
+  template: src=mysql.py dest=/usr/lib64/ganglia/python_modules/mysql_{{ port }}.py
+  notify: restart gmond
+  when: state != "absent"
+  tags: mysql_monitor
+
+- name: ganglia mysql_{{ port }} pyconf
+  template: src=mysql.pyconf dest=/etc/ganglia/conf.d/mysql_{{ port }}.pyconf
+  notify: restart gmond
+  when: state != "absent"
+  tags: mysql_monitor
+
+- name: mysql nrpe
+  template: src=mysql_nrpe.cfg dest=/etc/nrpe.d/mysql_{{ port }}.cfg
+  notify: restart nrpe
+  when: state != "absent"
+  tags: mysql_monitor
+
+- name: rm ganglia_mysql.py nrpe_mysql.cfg
+  file: dest={{ item }} state=absent
+  with_items:
+    - /usr/lib64/ganglia/python_modules/mysql_{{ port }}.py
+    - /etc/ganglia/conf.d/mysql_{{ port }}.pyconf
+  notify: restart gmond
+  when: state == "absent"
+  tags: mysql_monitor
+
+- name: rm nrpe_mysql.cfg
+  file: dest={{ item }} state=absent
+  with_items:
+    - /etc/nrpe.d/mysql_{{ port }}.cfg
+  notify: restart nrpe
+  when: state == "absent"
+  tags: mysql_monitor

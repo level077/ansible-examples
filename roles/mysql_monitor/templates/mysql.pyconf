@@ -1,0 +1,34 @@
+modules {
+  module {
+    name = "mysql_{{ port }}"
+    language = "python"
+    param RefreshRate {
+        value = 2
+    }
+    param Host {
+        value = "{{ ansible_ssh_host }}"
+    }
+    param Port {
+	value = "{{ port }}"	
+    }
+    param User {
+ 	value = "{{ monitor_user }}"	
+    }
+    param Password {
+ 	value = "{{ monitor_password }}"	
+    }
+    param Mysql {
+	value = "{{ install_path }}/mysql/bin/mysql"	
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+  metric {
+    name_match = "mysql_(.*)"
+    name = "mysql_\\1"
+    value_threshold = 1.0
+  }
+}
