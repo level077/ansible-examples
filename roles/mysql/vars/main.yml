@@ -1,0 +1,19 @@
+---
+#default variables
+
+package_path: /etc/ansible/packages
+
+#install or uninstall(choices: presnet,upgrade,absent. default:present)
+state: present
+
+#mysql port
+port: 3306
+
+#mysql db path
+db_path: /opt
+
+#server_id
+server_id: 1
+
+#innodb_buffer_pool_size
+innodb_buffer_pool_size: 40G

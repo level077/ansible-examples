@@ -1,0 +1,108 @@
+---
+# The playbook for mysql
+
+- name: check mysql
+  command: "{{ install_path }}/mysql/bin/mysql --version"
+  register: mysql_result
+  when: state != "absent"
+  ignore_errors: true
+  tags: mysql
+
+- name: install innotop percona-xtrabackup
+  yum: name={{ item }} state=present
+  with_items:
+  - perl-IO-Socket-SSL
+  - innotop
+  - openssl-devel
+  #- libmcrypto-devel
+  when: state != "absent"
+  tags: mysql
+
+- name: useradd mysql
+  user: name=mysql createhome=no
+  when: state != "absent"
+  tags: mysql
+
+- name: del /etc/my.cnf
+  file: dest=/etc/my.cnf state=absent
+  tags: mysql
+
+- name: rsync {{ package_path }}/mysql/{{ mysql_file }} to {{ install_path }}
+  synchronize: src={{ package_path }}/mysql/{{ mysql_file }} dest={{ install_path }}
+  when: mysql_result is defined and mysql_result.rc != 0 or state == "upgrade"
+  tags: mysql
+
+- name: ln -s {{ install_path }}/{{ mysql_file }} { install_path }}/mysql
+  file: src={{ install_path }}/{{ mysql_file }} dest={{ install_path }}/mysql state=link
+  when: state != "absent"
+  tags: mysql
+
+- name: create /etc/mysql/{{ port }} dir for my.cnf
+  file: dest=/etc/mysql/{{ port }} state=directory
+  when: state != "absent"
+  tags: mysql
+
+- name: deploy /etc/mysql/{{ port }}/my.cnf
+  template: src=my.cnf dest=/etc/mysql/{{ port }}/my.cnf
+  when: state != "absent"
+  tags: mysql
+
+- name: deploy mysql {{ port }} init script
+  template: src=mysqld dest=/etc/init.d/mysqld_{{ port }} mode=0755
+  when: state != "absent"
+  tags: mysql
+
+- name: check {{ db_path }}/mysql/{{ port }}/mysql
+  command: "ls {{ db_path }}/mysql/{{ port }}/mysql"
+  when: state != "absent"
+  register: db_result
+  ignore_errors: true
+  tags: mysql
+
+- name: create {{ db_path }}/mysql/{{ port }}
+  file: dest={{ db_path }}/mysql/{{ port }} state=directory owner=mysql group=mysql recurse=yes
+  when: state != "absent"
+  tags: mysql
+
+- name: init {{ port }} db
+  command: "chdir={{ install_path }}/mysql ./scripts/mysql_install_db --user=mysql --defaults-file=/etc/mysql/{{ port }}/my.cnf"
+  when: db_result is defined and db_result.rc != 0
+  tags: mysql
+
+- name: start mysqld_{{ port }} service
+  service: name=mysqld_{{ port }} enabled=yes state=started
+  when: state != "absent"
+  tags: mysql
+
+- name: wait for mysql to start
+  wait_for: port={{ port }}
+  when: state != "absent"
+  async: 45
+  poll: 5
+  tags: mysql
+
+- name: user init(delete from mysql.user where user == "" or host <> "localhost")
+  command: "{{ install_path }}/mysql/bin/mysql -u root -P {{ port }} -S {{ db_path }}/mysql/{{ port }}/mysql.sock -e 'delete from mysql.user where user = \"\" or host <> \"localhost\"'"
+  when: db_result is defined and db_result.rc != 0
+  tags: mysql
+
+- name: stop mysqld_{{ port }} service
+  service: name=mysqld_{{ port }} enabled=no state=stopped
+  when: state == "absent"
+  ignore_errors: true
+  tags: mysql
+
+- name: rm {{ db_path }}/mysql/{{ port }}
+  file: dest={{ db_path }}/mysql/{{ port }} state=absent
+  when: state == "absent"
+  tags: mysql
+
+- name: rm mysql {{ port }} init script
+  file: dest=/etc/init.d/mysqld_{{ port }} state=absent
+  when: state == "absent"
+  tags: mysql
+
+- name: rm mysql {{ port }} my.cnf
+  file: dest=/etc/mysql/{{ port }} state=absent
+  when: state == "absent"
+  tags: mysql 
