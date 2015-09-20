@@ -1,0 +1,39 @@
+---
+# The playbook for mysql_backup
+
+- name: rsync percona-xtrbackup rpm
+  synchronize: src={{ package_path }}/mysql_backup/{{ item }} dest=/tmp
+  with_items:
+    - percona-xtrabackup-2.2.6-5042.el6.x86_64.rpm
+  when: state != "absent"
+  tags: mysql_backup
+
+- name: install percona-xtrbackup rpm
+  yum: name={{ item }} state={{ state }}
+  with_items:
+    - /tmp/percona-xtrabackup-2.2.6-5042.el6.x86_64.rpm
+  tags: mysql_backup
+
+- name: rsync mysqlbackup.sh innobackup.sh to /root
+  template: src={{ item }} dest=/root mode=0755
+  with_items:
+    - innobackupex.sh
+    - mysqlbackup.sh
+  when: state != "absent"
+  tags: mysql_backup
+
+#- name: innoback full cron
+#  cron: name="{{ port }} full innoback" minute={{ full_minute }} hour={{ full_hour }} day={{ full_day }} month={{ full_month }} weekday={{ full_weekday }} job="/root/innobackupex.sh -h {{ ansible_ssh_port }} -p {{ port }} -f /etc/mysql/{{ port }}/my.cnf -t {{ db_path }}/backup/{{ port }} -i full" state={{ state }}
+#  tags: mysql_backup
+
+#- name: innoback incre cron
+#  cron: name="{{ port }} incre innoback" minute={{ incre_minute }} hour={{ incre_hour }} day={{ incre_day }} month={{ incre_month }} weekday={{ incre_weekday }} job="/root/innobackupex.sh -h {{ ansible_ssh_port }} -p {{ port }} -f /etc/mysql/{{ port }}/my.cnf -t {{ db_path }}/backup/{{ port }} -i incre" state={{ state }}
+#  tags: mysql_backup
+
+- name: rm /root/innobackupex.sh /root/mysqlbackup.sh
+  file: dest=/root/{{ item }} state=absent
+  with_items:
+    - innobackupex.sh
+    - mysqlbackup.sh
+  when: state == "absent"
+  tags: mysql_backup
