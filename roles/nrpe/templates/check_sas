@@ -1,0 +1,53 @@
+#!/usr/bin/perl -w
+use strict;
+use Data::Dumper;
+
+my $result;
+my $slot;
+my $hostname = shift;
+my $megacli = "/opt/MegaRAID/MegaCli/MegaCli64";
+die "$megacli do not exist" unless -e $megacli;
+my $send_cmd = "/usr/sbin/send_nsca -H {{ nsca_host }} -d ';' -c /etc/nagios/send_nsca.cfg";
+
+sub send_nsca {
+	my($hostname,$desc,$status,$message) = @_;
+	my $cmd = "echo $hostname';'$desc';'$status';'$message | $send_cmd";
+	system $cmd;
+}
+
+open LOG,"$megacli -PDList -aALL | " or die "can't pipe from $megacli:$!";
+while(<LOG>)
+{
+	chomp;
+	if(/Slot Number:/)
+	{
+		$slot = (split /:/)[1];
+	}
+	if(/Media Error Count:/)
+	{
+		my $m_error = (split /:/)[1];	
+		$result .= "$slot Media Error Count:$m_error" if($m_error != 0);
+	}
+	if(/Other Error Count:/)
+        {
+                my $o_error = (split /:/)[1];
+		$result .= "$slot Other Error Count:$o_error" if($o_error != 0);
+        }
+}
+
+unless(defined $slot)
+{
+	print "no raid or exe MegaCli error";
+	&send_nsca($hostname,"check_sas",1,"no raid or exe MegaCli error");
+}
+
+if(defined $result)
+{
+	print $result;
+	&send_nsca($hostname,"check_sas",2,$result);
+}
+else
+{
+	print "ok";
+	&send_nsca($hostname,"check_sas",0,"ok");
+}

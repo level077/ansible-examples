@@ -1,0 +1,38 @@
+---
+# The playbook for nrpe
+
+- name: yum install nrpe
+  yum: name={{ item }} state={{ state }} 
+  with_items:
+    - nrpe
+    - nagios-plugins-all  
+    - nsca-client
+  tags: nrpe
+
+- name: nrpe config
+  template: src=nrpe.cfg dest=/etc/nagios/nrpe.cfg
+  with_items:
+    - nrpe.cfg
+    - send_nsca.cfg
+  when: state != "absent"
+  notify: restart nrpe
+  tags: nrpe 
+
+- name: start nrpe
+  service: name=nrpe state=started enabled=yes
+  when: state != "absent"
+  tags: nrpe
+
+- name: check_sas 
+  template: src=check_sas dest=/etc/nagios/check_sas owner=root group=root mode=0755
+  when: state != "absent"
+  tags: nrpe
+
+- name: set check_sas crontab
+  cron: name="check_sas" minute=30 job="/root/check_sas {{ ansible_hostname }} > /dev/null 2>&1" backup=yes state={{ state }}
+  tags: nrpe
+
+- name: rm check_sas
+  file: dest=/etc/nagios/check_sas state=absent
+  when: state == "absent"
+  tags: nrpe
