@@ -1,0 +1,20 @@
+---
+# The playbook for system init
+
+- name: yum install ganglia-gmond
+  yum: name={{ item }} state={{ state }} 
+  with_items:
+    - ganglia-gmond
+    - ganglia-gmond-python
+  tags: gmond
+
+- name: gmond.conf
+  template: src=gmond.conf dest=/etc/ganglia/gmond.conf
+  notify: restart gmond
+  when: state != "absent"
+  tags: gmond
+
+- name: start gmond
+  service: name=gmond state=started enabled=yes
+  when: state != "absent"
+  tags: gmond
