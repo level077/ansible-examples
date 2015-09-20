@@ -1,0 +1,53 @@
+---
+# The playbook for tomcat deploy
+
+- name: yum install cronolog
+  yum: name=cronolog state=present
+  when: state != "absent"
+  tags: tomcat
+
+- name: Create tomcat_{{ port }} dir
+  file: path={{ install_path }}/tomcat/tomcat_{{ port }} state=directory
+  when: state != "absent"
+  tags: tomcat
+
+- name: check tomcat
+  command: "ls {{ install_path }}/tomcat/tomcat_{{ port }}/bin/catalina.sh"
+  register: tomcat_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: tomcat
+
+- name: deploy tomcat_{{ port }}
+  synchronize: src={{ package_path }}/tomcat/{{ tomcat_file }}/ dest={{ install_path }}/tomcat/tomcat_{{ port }}/ 
+  when: tomcat_result is defined and tomcat_result.rc !=0 or state == "upgrade"
+  tags: tomcat
+
+- name: deploy server.xml
+  template: src=server.xml dest={{ install_path }}/tomcat/tomcat_{{ port }}/conf/server.xml
+  when: state != "absent"
+  tags: tomcat
+
+- name: deploy Catalina.sh
+  template: src=catalina.sh dest={{ install_path }}/tomcat/tomcat_{{ port }}/bin/catalina.sh mode=0755
+  when: state != "absent"
+  tags: tomcat
+
+- name: deploy tomcat.sh
+  template: src=tomcat.sh dest={{ init_path }}/tomcat.sh mode=0755
+  when: state != "absent"
+  tags: tomcat
+
+- name: Create {{ war_path }} dir
+  file: path={{ war_path }} state=directory
+  when: state != "absent"
+  tags: tomcat
+
+- name: set tomcat crontab
+  cron: name="tomcat log" minute=00 hour=03 job="find {{ install_path }}/tomcat/*/logs/*  -type f -mtime +7  -exec rm {} \; > /dev/null 2>&1" backup=yes state={{ state }}
+  tags: tomcat
+
+- name: rm tomcat_{{ port }}
+  file: dest={{ install_path }}/tomcat/tomcat_{{ port }} state=absent
+  when: state == "absent"
+  tags: tomcat

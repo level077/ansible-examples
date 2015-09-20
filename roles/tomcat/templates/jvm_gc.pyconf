@@ -1,0 +1,31 @@
+modules {
+  module {
+    name = "jvm_gc_{{ port }}"
+    language = "python"
+    param RefreshRate {
+        value = 5
+    }
+    param JAVA_HOME {
+        value = "{{ java_home }}"
+    }
+    param Port {
+        value = "{{ port }}"
+    }
+
+    param PID_CMD {
+	value = "ps xau  | grep java | grep -v grep  | grep _{{ port }} | awk '{print $2}'"
+    }
+  }
+}
+
+#/* Collection groups for the
+#    example python module */
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+  metric {
+    	name_match = "JVMGC_(.*)"
+    	name = "JVMGC_\\1"
+    	value_threshold = 0.1
+  }
+}

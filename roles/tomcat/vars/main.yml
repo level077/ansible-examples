@@ -1,0 +1,42 @@
+---
+# default variables
+
+#server.xml
+maxThreads: 1000
+minSpareThreads: 400
+port: 8310
+protocol: org.apache.coyote.http11.Http11NioProtocol
+connectionTimeout: 20000
+acceptCount: 2500
+shutdown_port: 18310
+
+#catalina.sh
+Xms: 2048m
+Xmx: 2048m
+Xmn: 128m
+PermSize: 64m
+MaxPermSize: 256m
+
+#tomcat install path
+install_path: /usr/local
+
+#war dir
+war_path: /usr/local/apps
+
+#JAVA_HOME
+java_home: /usr/local/jdk
+
+#mount
+mount_path: /data
+mount_src: 192.168.0.74:/data
+mount_fstype: glusterfs
+mount_opts: defaults,_netdev
+
+#package path
+package_path: /etc/ansible/packages 
+
+#init script dir
+init_path: /etc/init.d
+
+#install or uninstall(choices:present,absent.default:absent)
+state: present
