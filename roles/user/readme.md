@@ -9,5 +9,7 @@ user用于创建用户，并添加相应的key，同时选择是否添加到sudo
 * is_sudo: yes或者no
 
 #Usage
+```
 roles:  
 - { role: user, username: xiaoming, ssh_pubkey: xiaoming.pub, is_sudo: "yes", tags: user }
+```
