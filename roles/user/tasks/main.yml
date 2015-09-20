@@ -1,0 +1,23 @@
+---
+# The role for user
+
+- name: useradd {{ username }}
+  user: name={{ username }} state={{ state }} remove=yes
+  tags: user
+
+- name: install {{ username }} key
+  authorized_key: user={{ username }} key="{{ item }}"
+  with_file:
+     - "{{package_path}}/user/{{ ssh_pubkey }}"
+  when: state == "present"
+  tags: user
+
+- name: visudo
+  template: src=sudoers dest=/etc/sudoers.d/{{ username }} mode=0440 
+  when: state == "present" and is_sudo is defined and is_sudo == "yes"
+  tags: user
+
+- name: del {{ username }}
+  file: dest=/etc/sudoers.d/{{ username }} state=absent
+  when: state == "absent"
+  tags: user 
