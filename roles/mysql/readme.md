@@ -15,4 +15,5 @@ mysql模块
 ```
 roles:  
 - { role: mysql, mysql_file: mysql_5.6.12, innodb_buffer_pool_size: 1G, port: 3306, db_path: /opt, server_id: 58, install_path: /usr/local, tags: mysql, state: present }
+- { role: mysql, mysql_file: mysql_5.6.12, innodb_buffer_pool_size: 1G, port: 3307, db_path: /opt, server_id: 59, install_path: /usr/local, tags: mysql, state: present }
 ```
