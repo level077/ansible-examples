@@ -1,0 +1,41 @@
+---
+# The playbook for supervisor
+- name: yum install supervisor
+  yum: name={{ item }} state=present
+  with_items:
+    - supervisor
+  when: state != "absent"
+  tags: supervisor
+
+- name: deploy supervisord.conf
+  template: src=supervisord.conf  dest=/etc/supervisord.conf
+  notify: restart supervisord
+  when: state != "absent"
+  tags: supervisor
+
+- name: create /etc/supervisord dir
+  file: dest=/etc/supervisord state=directory
+  when: state != "absent"
+  tags: supervisor
+
+- name: create /var/log/supervisor dir
+  file: dest=/var/log/supervisor state=directory
+  when: state != "absent"
+  tags: supervisor
+
+- name: deploy {{ service }} conf
+  template: src=service.conf dest=/etc/supervisord/{{ service }}.conf
+  notify: restart supervisord
+  when: state != "absent"
+  tags: supervisor
+
+- name: start supervisord service
+  service: name=supervisord enabled=yes state=started
+  when: state != "absent"
+  tags: supervisor
+
+- name: rm {{ service }}.conf 
+  file: dest=/etc/supervisord/{{ service }}.conf state=absent
+  notify: restart supervisord
+  when: state == "absent"
+  tags: supervisor
