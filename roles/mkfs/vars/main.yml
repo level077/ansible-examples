@@ -1,0 +1,11 @@
+---
+#default variables
+package_path: /etc/ansible/packages
+
+#install or uninstall(choices:presnet,latest,absent)
+state: present
+
+#mkfs
+fstype: ext4
+mount_dir: /app
+dev: /dev/xvdb

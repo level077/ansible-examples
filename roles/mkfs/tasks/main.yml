@@ -1,0 +1,13 @@
+---
+# The role for mkfs
+
+# mkfs and mount
+- name: mkfs
+  filesystem: fstype={{ fstype }} dev={{ dev }}
+  when: state != "absent"
+  tags: mkfs
+
+- name: mount
+  mount: name={{ mount_dir }} src={{ dev }} fstype={{ fstype }} opts=defaults,noatime state=mounted
+  when: state != "absent"
+  tags: mkfs
