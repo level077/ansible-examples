@@ -1,0 +1,13 @@
+---
+# The playbook for system init
+
+- name: install gluster-epel.repo
+  template: src=glusterfs-epel.repo dest=/etc/yum.repos.d/glusterfs-epel.repo mode=0644
+  when: state != "absent"
+  tags: glusterfs_server
+
+- name: install glusterfs-server
+  yum: name={{ item }} state={{ state }} 
+  with_items:
+  - glusterfs-server
+  tags: glusterfs_server
