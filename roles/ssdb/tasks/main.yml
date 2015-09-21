@@ -1,0 +1,61 @@
+---
+- name: check ssdb
+  command: "{{ install_path }}/ssdb/bin/ssdb-server -h"
+  register: ssdb_result
+  when: state != "absent"
+  ignore_errors: true
+  tags: ssdb
+
+- name: rsync ssdb to {{ install_path }}
+  synchronize: src={{ package_path }}/ssdb/ssdb dest={{ install_path }}
+  when: ssdb_result is defined and ssdb_result.rc == 2 or state == "upgrade"
+  tags: ssdb
+
+- name: conf the ssdb configure file
+  template: src=ssdb.conf dest="{{install_path}}/ssdb/conf/" mode=0644
+  notify: restart ssdb
+  when: state != "absent"
+  tags: ssdb
+
+- name: create ssdb data dir {{ db_path }}/ssdb
+  file: dest={{ db_path }}/ssdb state=directory recurse=yes
+  when: state != "absent"
+  tags: ssdb
+
+- name: deploy init script
+  template: src=ssdb dest=/etc/init.d mode=0755
+  when: state != "absent"
+  tags: ssdb
+
+- name: ensure ssdb is running
+  service: name=ssdb state=started enabled=yes
+  when: state != "absent"
+  tags: ssdb
+
+- name: wait for ssdb to start
+  wait_for: port={{ port }} state=started
+  when: state != "absent"
+  async: 45
+  poll: 5
+  tags: ssdb
+
+- name: stop ssdb
+  service: name=ssdb state=stopped
+  when: state == "absent"
+  tags: ssdb
+
+- name: wait for ssdb to stop
+  wait_for: port={{ port }} state=stopped
+  when: state == "absent"
+  async: 45
+  poll: 5
+  tags: ssdb
+
+- name: rm {{ install_path }}/ssdb {{ db_path }}/ssdb /etc/init.d/ssdb
+  file: dest={{ item }} state=absent
+  with_items:
+    - "{{ install_path }}/ssdb"
+    - "{{ db_path }}/ssdb"
+    - "/etc/init.d/ssdb"
+  when: state == "absent"
+  tags: ssdb

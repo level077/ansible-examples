@@ -1,0 +1,4 @@
+---
+install_path: /usr/local
+port: 8888
+state: present

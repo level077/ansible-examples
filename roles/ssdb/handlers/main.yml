@@ -1,0 +1,6 @@
+---
+- name: restart ssdb
+  service: name=ssdb state=restarted
+
+- name: reload ssdb
+  service: name=ssdb state=reloaded
