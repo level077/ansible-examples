@@ -1,0 +1,6 @@
+---
+#default variables
+package_path: /etc/ansible/packages
+
+#state
+state: present

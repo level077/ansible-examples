@@ -1,0 +1,16 @@
+---
+# The playbook for system init
+
+- name: install gluster-epel.repo
+  template: src=glusterfs-epel.repo dest=/etc/yum.repos.d/glusterfs-epel.repo mode=0644
+  when: state != "absent"
+  tags: glusterfs_client
+
+- name: install fuse fuse-libs glusterfs glusterfs-fuse
+  yum: name={{ item }} state={{ state }} 
+  with_items:
+  - fuse
+  - fuse-libs
+  - glusterfs
+  - glusterfs-fuse
+  tags: glusterfs_client
