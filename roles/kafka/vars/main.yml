@@ -1,0 +1,17 @@
+---
+# kafka clusters
+kafka_clusters:
+  slave-01:
+    id: 82
+    ip: 10.3.1.82
+    port: 9092
+  slave-02:
+    id: 83
+    ip: 10.3.1.83
+    port: 9092
+
+# zookeeper connection
+zookeeper_clusters_connections: "10.3.1.88:2181,10.3.1.89:2181"
+
+#kafka version
+version: 2.10-0.8.2.1

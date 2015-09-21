@@ -1,0 +1,6 @@
+---
+- name: conf the kafka configure file
+  template: src=server.properties dest="{{install_path}}/kafka/config/" mode=0755
+  with_dict: kafka_clusters 
+  when: ansible_default_ipv4.address == item.value.ip
+

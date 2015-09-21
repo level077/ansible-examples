@@ -1,0 +1,48 @@
+---
+- name: rsync files to dest host
+  synchronize: src={{ package_path }}/kafka/kafka_{{ version }} dest={{ install_path }}
+  when: state != "absent"
+  tags: kafka
+
+- name: ln -s {{ install_path }}/kafka_{{ version }} {{ install_path }}/kafka
+  file: src={{ install_path }}/kafka_{{ version }} dest={{ install_path }}/kafka state=link
+  when: state != "absent"
+  tags: kafka
+
+- name: create {{ log_path }}/kafka-logs
+  file: dest={{ log_path }}/kafka-logs state=directory recurse=yes
+  when: state != "absent"
+  tags: kafka
+
+- name: conf the kafka configure file
+  template: src=server.properties dest="{{install_path}}/kafka/config/" mode=0644
+  with_dict: kafka_clusters
+  when: state != "absent"
+  notify: restart kafka
+  tags: kafka
+
+- name: install init script
+  template: src={{item.src}} dest={{item.dest}} mode=0755
+  with_items:
+    - { src: kafka, dest: "/etc/init.d/"}
+  when: state != "absent"
+  tags: kafka
+
+- name: ensure zookeeper is running
+  service: name=zookeeper state=started enabled=yes
+  when: state != "absent"
+  tags: kafka
+
+- name: stop zookeeper
+  service: name=zookeeper state=stopped enabled=no
+  when: state == "absent"
+  tags: kafka
+
+- name: rm {{ install_path }}/kafka /etc/init.d/kafka 
+  file: dest={{ item }} state=absent
+  with_items:
+    - "{{ install_path }}/kafka"
+    - "/etc/init.d/kafka"
+    - "{{ log_path }}/kafka-logs"
+  when: state == "absent"
+  tags: kafka
