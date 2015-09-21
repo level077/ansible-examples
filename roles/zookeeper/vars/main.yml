@@ -1,0 +1,7 @@
+---
+# the directory where the snapshot is stored.
+dataDir: /var/lib/zookeeper/data
+dataLogDir: /var/lib/zookeeper/logs
+
+# the install zookeeper version
+version: 3.4.6

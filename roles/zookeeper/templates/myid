@@ -1,0 +1,5 @@
+{% for item in clusters %}
+{% if item.ip == ansible_ssh_host %}
+{{ item.id }}
+{% endif %}
+{% endfor %}

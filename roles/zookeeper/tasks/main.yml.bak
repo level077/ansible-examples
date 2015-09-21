@@ -1,0 +1,72 @@
+---
+# The playbook for zookeeper
+
+- name: rsync zookeeper-{{ version }}
+  synchronize: src={{ package_path }}/zookeeper/zookeeper-{{ version }} dest={{ install_path }}
+  when: state != "absent"
+  tags: zookeeper
+
+- name: ln -s {{ install_path }}/zookeeper-{{ version }} {{ install_path }}/zookeeper
+  file: src={{ install_path }}/zookeeper-{{ version }} dest={{ install_path }}/zookeeper state=link
+  when: state != "absent"
+  tags: zookeeper
+
+- name: create zookeeper {{ dataDir }} {{ dataLogDir }} dir
+  file: dest={{ item }} state=directory
+  with_items:
+    - "{{ dataDir }}"
+    - "{{ dataLogDir }}"
+  when: state != "absent"
+
+- name: conf the zookeeper configure file
+  template: src=zoo.cfg dest="{{install_path}}/zookeeper/conf/" mode=0644
+  with_dict: clusters
+  notify: restart zookeeper
+  when: state != "absent"
+  tags: zookeeper
+
+- name: configure conf
+  lineinfile: dest="{{install_path}}/zookeeper/conf/zoo.cfg" line='server.{{item.value.id}}={{item.key}}:2888:3888'
+  with_dict: clusters
+  notify: restart zookeeper
+  when: state != "absent"
+  tags: zookeeper
+
+- name: install init script
+  template: src={{item.src}} dest={{item.dest}} mode=0755
+  with_items:
+    - { src: zookeeper, dest: /etc/init.d/}
+  when: state != "absent"
+  tags: zookeeper
+
+- name: ensure zookeeper is running
+  service: name=zookeeper enabled=yes state=started
+  when: state != "absent"
+  tags: zookeeper
+
+- name: configure hosts
+  lineinfile: dest=/etc/hosts line='{{item.value.ip}} {{item.key}}' backup=yes state={{ state }}
+  with_dict: clusters
+  tags: zookeeper
+
+- name: configure myid 
+  template: src=myid dest={{ dataLogDir }}
+  with_dict: clusters
+  when: state != "absent"
+  tags: zookeeper
+
+- name: stop zookeeper
+  service: name=zookeeper enabled=no state=stopped
+  when: state == "absent"
+  tags: zookeeper
+
+- name: rm zookeeper
+  file: dest={{ item }} state=absent
+  with_items:
+    - "{{ install_path }}/zookeeper"
+    - "{{ install_path }}/zookeeepr-{{ version }}"
+    - "/etc/init.d/zookeeper"
+    - "{{ dataDir }}"
+    - "{{ dataLogDir }}"
+  when: state == "absent"
+  tags: zookeeper
