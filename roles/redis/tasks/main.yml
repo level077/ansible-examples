@@ -1,0 +1,97 @@
+---
+# The playbook for redis
+
+- name: check redis
+  command: "{{ install_path }}/redis/bin/redis-server -v"
+  register: redis_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: redis
+
+- name: rsync redis-{{ redis_version }}
+  synchronize: src={{ package_path }}/redis/redis-{{ redis_version }} dest=/tmp
+  when: redis_result is defined and redis_result.rc !=0 or state == "upgrade"
+  tags: redis
+
+- name: yum install jemalloc-devel rubygems ruby
+  yum: name={{ item }}
+  with_items:
+  - jemalloc-devel
+  - rubygems 
+  - ruby
+  when: redis_result is defined and redis_result.rc !=0 or state == "upgrade"
+  tags: redis
+
+- name: gem install redis
+  command: gem install redis
+  when: redis_result is defined and redis_result.rc !=0 or state == "upgrade"
+  tags: redis
+
+- name: create {{ install_path }}/redis
+  file: dest={{ install_path }}/redis state=directory
+  when: redis_result is defined and redis_result.rc !=0 or state == "upgrade"
+  tags: redis
+
+- name: make redis
+  command: chdir=/tmp/redis-{{ redis_version }} make MALLOC=jemalloc PREFIX={{ install_path }}/redis install -j8
+  when: state == "upgrade" or redis_result is defined and redis_result.rc != 0
+  tags: redis
+
+- name: deploy redis_{{ port }} init script
+  template: src=redis dest=/etc/init.d/redis_{{ port }} mode=0755
+  when: state != "absent"
+  tags: redis
+
+- name: create conf and log directory
+  file: dest={{ install_path }}/redis/{{ item }} state=directory
+  with_items:
+    - conf
+    - logs
+  when: state != "absent"
+  tags: redis
+
+- name: deploy redis_{{ port }} conf
+  template: src=redis.conf dest={{ install_path }}/redis/conf/redis_{{ port }}.conf
+  when: state != "absent"
+  tags: redis
+
+- name: deploy redis-trib.rb
+  template: src=redis-trib.rb dest={{ install_path }}/redis/bin mode=0755
+  when: state != "absent"
+  tags: redis
+
+- name: create {{ db_path }}/redis/{{ port }}
+  file: dest={{ db_path }}/redis/{{ port }} state=directory
+  when: state != "absent"
+  tags: redis
+
+- name: start redis_{{ port }} service
+  service: name=redis_{{ port }} enabled=yes state=started
+  when: state != "absent"
+  tags: redis
+
+- name: stop redis_{{ port }} service
+  service: name=redis_{{ port }} enabled=no state=stopped
+  when: state == "absent" 
+  ignore_errors: true
+  tags: redis
+
+- name: rm redis_{{ port }} init script
+  file: dest=/etc/init.d/redis_{{ port }} state=absent
+  when: state == "absent"
+  tags: redis
+
+- name: rm redis_{{ port }}.conf
+  file: dest={{ install_path }}/redis/conf/redis_{{ port }}.conf state=absent
+  when: state == "absent"
+  tags: redis
+
+- name: rm redis_{{ port }}.log
+  file: dest={{ install_path }}/redis/logs/redis_{{ port }}.log state=absent
+  when: state == "absent"
+  tags: redis
+
+- name: rm {{ db_path }}/redis/{{ port }}
+  file: dest={{ db_path }}/redis/{{ port }} state=absent
+  when: state == "absent"
+  tags: redis
