@@ -1,0 +1,23 @@
+---
+# The playbook for memcache_monitor
+
+- name: ganglia memcache_{{ port }} py
+  template: src=memcache.py dest=/usr/lib64/ganglia/python_modules/memcache_{{ port }}.py
+  notify: restart gmond
+  when: state != "absent"
+  tags: memcache_monitor
+
+- name: ganglia memcache_{{ port }} pyconf
+  template: src=memcache.pyconf dest=/etc/ganglia/conf.d/memcache_{{ port }}.pyconf
+  notify: restart gmond
+  when: state != "absent"
+  tags: memcache_monitor
+
+- name: rm memcache_{{ port }}.py memcache_{{ port }}.pyconf
+  file: dest={{ item }} state=absent
+  with_items:
+    - /usr/lib64/ganglia/python_modules/memcache_{{ port }}.py
+    - /etc/ganglia/conf.d/memcache_{{ port }}.pyconf
+  notify: restart gmond
+  when: state == "absent"
+  tags: memcache_monitor

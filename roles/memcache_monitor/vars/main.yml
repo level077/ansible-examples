@@ -1,0 +1,13 @@
+---
+#default variables
+
+package_path: /etc/ansible/packages
+
+#mysql install path
+install_path: /usr/local
+
+#install or uninstall(choices: presnet,upgrade,absent. default:present)
+state: present
+
+#mysql port
+port: 11211

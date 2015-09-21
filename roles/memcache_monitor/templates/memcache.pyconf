@@ -1,0 +1,25 @@
+modules {
+  module {
+    name = "memcache_{{ port }}"
+    language = "python"
+    param RefreshRate {
+        value = 2
+    }
+    param Host {
+        value = "{{ ansible_ssh_host }}"
+    }
+    param Port {
+	value = "{{ port }}"	
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+  metric {
+    name_match = "memcache_(.*)"
+    name = "memcache_\\1"
+    value_threshold = 1.0
+  }
+}
