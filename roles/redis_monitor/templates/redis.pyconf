@@ -1,0 +1,28 @@
+modules {
+  module {
+    name = "redis_{{ port }}"
+    language = "python"
+    param RefreshRate {
+        value = 2
+    }
+    param Host {
+        value = "{{ ansible_ssh_host }}"
+    }
+    param Port {
+	value = "{{ port }}"	
+    }
+    param Redis_cli {
+  	value = "{{ redis_cli }}"	
+    }
+  }
+}
+
+collection_group {
+  collect_every = 10
+  time_threshold = 20
+  metric {
+    name_match = "redis_(.*)"
+    name = "redis_\\1"
+    value_threshold = 1.0
+  }
+}

@@ -1,0 +1,23 @@
+---
+# The playbook for redis_monitor
+
+- name: ganglia redis_{{ port }} py
+  template: src=redis.py dest=/usr/lib64/ganglia/python_modules/redis_{{ port }}.py
+  notify: restart gmond
+  when: state != "absent"
+  tags: redis_monitor
+
+- name: ganglia redis_{{ port }} pyconf
+  template: src=redis.pyconf dest=/etc/ganglia/conf.d/redis_{{ port }}.pyconf
+  notify: restart gmond
+  when: state != "absent"
+  tags: redis_monitor
+
+- name: rm redis_{{ port }}.py redis_{{ port }}.pyconf
+  file: dest={{ item }} state=absent
+  with_items:
+    - /usr/lib64/ganglia/python_modules/redis_{{ port }}.py
+    - /etc/ganglia/conf.d/redis_{{ port }}.pyconf
+  notify: restart gmond
+  when: state == "absent"
+  tags: redis_monitor
