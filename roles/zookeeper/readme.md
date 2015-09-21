@@ -3,7 +3,7 @@ zookeeper模块
 
 #Args
 * package_path: 本例为/etc/ansible/packages 
-* install_path: redis部署目录，{{ install_path }}/zookeeper
+* install_path: zookeeper部署目录，{{ install_path }}/zookeeper
 * version: zookeeper版本
 * state: present或者absent
 * clusters: zookeeper集群配置
