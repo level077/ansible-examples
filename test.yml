@@ -1,15 +1,21 @@
 ---
-
 - hosts: test
   roles:
-    - common
-    - { role: ganglia-gmond, state: absent}
-    - { role: ganglia-gmetad, state: absent}
-    - { role: jdk, install_path: /usr/local, jdk_file: jdk1.6.0_32, state: absent }
-    - { role: nginx, install_path: /usr/local/app, state: absent } 
-    - { role: tomcat,port: 8311,shutdown_port: 18311, state: absent }
-    - { role: mongodb, port: 28018, install_path: /usr/local/mongodb, db_path: /opt, state: absent}
-    - { role: redis, install_path: /usr/local/app, db_path: /opt, state: absent}
-    - { role: memcache, port: 11211, state: absent}
-    - { role: memcache, port: 11212, state: absent}
-    - { role: mysql, port: 3306, server_id: 1, state: absent}
+  - { role: user, username: xiaoming, ssh_pubkey: xiaoming.pub, is_sudo: "yes", tags: user }
+  - { role: nrpe, allowed_hosts: 10.3.1.0/24, nsca_host: 10.3.1.151, tags: nrpe }
+  - { role: ganglia-gmond, cluster_name: db, mcast_ip: 239.2.11.71, tags: ganglia-gmond }
+  - { role: jdk, jdk_file: jdk1.7.0_15, tags: jdk }
+  - { role: tomcat, tomcat_file: tomcat7, install_path: /usr/local, port: 8100, shutdown_port: 18100, Xmn: 875m, Xms: 3072m, Xmx: 3072m, PermSize: 128m, MaxPermSize: 128m, context: [{"webapp":"xxx.war","path":"/xxx"}], war_path: /usr/local/apps, tags: tomcat }
+  - { role: openresty, install_path: /usr/local, conf: nginx.conf, tags: nginx, state: absent }
+  - { role: mysql, mysql_file: mysql_5.6.12, innodb_buffer_pool_size: 1G, port: 3306, db_path: /opt, server_id: 58, install_path: /usr/local, tags: mysql, state: present }
+  - { role: mysql_backup, mysql_path: /usr/local/mysql, mysql_backup_path: /opt/mysql_backup, tags: mysql_backup, state: absent }
+  - { role: mysql_monitor, port: 33061, install_path: /usr/local, monitor_user: xxx, monitor_password: xxx, tags: mysql_monitor, state: absent }
+  - { role: redis, install_path: /usr/local, db_path: /opt, port: 7000, cluster_enabled: "no", maxmemory: 1GB, redis_version: 3.0.2, state: present, tags: redis }
+  - { role: redis_monitor, port: 7000, redis_cli: /usr/local/redis/bin/redis-cli, state: absent, tags: redis_monitor }
+  - { role: memcache, port: 11211, memory_size: 406, state: present, tags: memcache }
+  - { role: memcache_monitor, port: 11211, state: absent }
+  - { role: supervisor, service: openfire, command: /bin/sh /usr/local/mrs/bin/openfire.sh, env: 'JAVA_HOME="/usr/local/jdk",OPENFIRE_OPTS="-Xmn875m -Xms3072m -Xmx3072m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:MaxTenuringThreshold=16 -XX:+ExplicitGCInvokesConcurrent -XX:+CMSParallelRemarkEnabled -XX:+PrintTenuringDistribution -XX:+PrintGCDateStamps -XX:StringTableSize=10000"', tags: supervisor, state: absent }
+  - { role: ssdb, install_path: /usr/local, db_path: /data, port: 8888, cache_size: 400, tags: ssdb, state: present}
+  - { role: glusterfs_client, tags: glusterfs_client, state: present }
+  - { role: glusterfs_server, tags: glusterfs_server, state: present }
+  - { role: zookeeper, install_path: /usr/local, dataDir: /opt/zookeeper, dataLogDir: /opt/zookeeper, version: 3.4.6, clusters: [{host: im-zk-1, id: 2, ip: 127.0.0.1, port: 2181}, {host: test2, id: 1, ip: 10.3.1.141, port: 2181}], state: absent, tags: zookeeper }
