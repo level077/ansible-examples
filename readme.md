@@ -5,3 +5,4 @@ Description
 * 这些roles仅适用于centos6
 * 在group_vars中定义了全局变量: package_path和state
 * ansible_ssh_host变量定义在hosts文件中
+* 在每个role下有各自的readme.md
