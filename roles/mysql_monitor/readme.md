@@ -13,5 +13,5 @@ mysql监控模块,包含一个nrpe配置，一个ganglia监控脚本
 #Usage
 ```
 roles:  
-- { role: mysql_monitor, port: 33061, install_path: /usr/local, monitor_user: monitor, monitor_password: monitor, tags: mysql_monitor, state: absent }
+- { role: mysql_monitor, port: 33061, install_path: /usr/local, monitor_user: xxxx, monitor_password: yyy, tags: mysql_monitor, state: absent }
 ```
