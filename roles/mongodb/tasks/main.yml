@@ -1,0 +1,48 @@
+---
+# The playbook for mongodb
+
+- name: check mongodb
+  command: "{{ install_path }}/mongodb/bin/mongo --version"
+  register: mongodb_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: mongodb
+
+- name: rsync mongodb
+  synchronize: src={{ package_path }}/mongodb/mongodb dest={{ install_path}}
+  when: mongodb_result is defined and mongodb_result.rc !=0 or state == "upgrade"
+  tags: mongodb
+
+- name: deploy mongodb init script
+  template: src=mongodb dest=/etc/init.d/mongodb_{{ port }} mode=0755
+  when: state != "absent"
+  notify: restart mongodb_{{ port }}
+  tags: mongodb
+
+- name: start mongodb service
+  service: name=mongodb_{{ port }} enabled=yes state=started
+  when: state != "absent"
+  tags: mongodb
+
+- name: wait for mongodb to start
+  wait_for: port={{ port }}
+  async: 45
+  poll: 5
+  when: state != "absent"
+  tags: mongodb
+
+- name: stop mongodb service
+  service: name=mongodb_{{ port }} enabled=no state=stopped
+  when: state == "absent" 
+  ignore_errors: true
+  tags: mongodb
+
+- name: rm mongodb_{{ port }} init script
+  file: dest=/etc/init.d/mongodb_{{ port }} state=absent
+  when: state == "absent" 
+  tags: mongodb
+
+- name: rm {{ db_path }}/mongodb/{{ port }}
+  file: dest={{ db_path }}/mongodb/{{ port }} state=absent
+  when: state == "absent"
+  tags: mongodb

@@ -1,0 +1,4 @@
+---
+
+- name: restart mongodb_{{ port }}
+  service: name=mongodb_{{ port }} state=restarted
