@@ -25,7 +25,7 @@ start() {
 	echo never > /sys/kernel/mm/transparent_hugepage/enabled
 	sysctl -w net.core.somaxconn=512
 	sysctl -w vm.overcommit_memory=1
-	$EXEC $CONF
+	su -s '/bin/sh' -c "'$EXEC $CONF'" nobody
 	RETVAL=$?
 	echo 
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/$prog

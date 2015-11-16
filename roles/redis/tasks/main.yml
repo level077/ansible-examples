@@ -28,7 +28,7 @@
   tags: redis
 
 - name: create {{ install_path }}/redis
-  file: dest={{ install_path }}/redis state=directory
+  file: dest={{ install_path }}/redis state=directory owner=nobody group=nobody
   when: redis_result is defined and redis_result.rc !=0 or state == "upgrade"
   tags: redis
 
@@ -43,7 +43,7 @@
   tags: redis
 
 - name: create conf and log directory
-  file: dest={{ install_path }}/redis/{{ item }} state=directory
+  file: dest={{ install_path }}/redis/{{ item }} state=directory owner=nobody group=nobody
   with_items:
     - conf
     - logs
@@ -51,7 +51,7 @@
   tags: redis
 
 - name: deploy redis_{{ port }} conf
-  template: src=redis.conf dest={{ install_path }}/redis/conf/redis_{{ port }}.conf
+  template: src=redis.conf dest={{ install_path }}/redis/conf/redis_{{ port }}.conf owner=nobody group=nobody
   when: state != "absent"
   tags: redis
 
@@ -61,7 +61,7 @@
   tags: redis
 
 - name: create {{ db_path }}/redis/{{ port }}
-  file: dest={{ db_path }}/redis/{{ port }} state=directory
+  file: dest={{ db_path }}/redis/{{ port }} state=directory owner=nobody group=nobody
   when: state != "absent"
   tags: redis
 
