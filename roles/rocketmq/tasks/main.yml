@@ -2,13 +2,15 @@
 - name: check rocketmq
   command: "sh {{ install_path }}/rocketmq/bin/mqnamersrv -h"
   register: rocketmq_result
+  environment:
+      JAVA_HOME: "{{ JAVA_HOME }}"
   when: state != "absent"
   ignore_errors: true
   tags: rocketmq
 
 - name: rsync rocketmq to {{ install_path }}
   synchronize: src={{ package_path }}/rocketmq/rocketmq dest={{ install_path }}
-  when: rocketmq_result is defined and rocketmq_result.rc != 0 or state == "upgrade"
+  when: rocketmq_result is defined and rocketmq_result.rc == 127 or state == "upgrade"
   tags: rocketmq
 
 - name: template log.xml

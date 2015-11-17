@@ -19,3 +19,4 @@
   - { role: glusterfs_client, tags: glusterfs_client, state: present }
   - { role: glusterfs_server, tags: glusterfs_server, state: present }
   - { role: zookeeper, install_path: /usr/local, dataDir: /opt/zookeeper, dataLogDir: /opt/zookeeper, version: 3.4.6, clusters: [{host: im-zk-1, id: 2, ip: 127.0.0.1, port: 2181}, {host: test2, id: 1, ip: 10.3.1.141, port: 2181}], state: absent, tags: zookeeper }
+  - { role: rocketmq, install_path: /usr/local, JAVA_HOME: /usr/local/jdk, brokerClusterName: default, brokerName: test, namesrvAddr: '172.28.5.60:9876;172.28.5.59:9876', brokerPort: 10911, storePathRootDir: /data/rocketmq, storePathCommitLog: /data/rocketmq/commitlog, clusters: [{ip: 172.28.5.59, brokerId: 0, brokerRole: ASYNC_MASTER},{ip: 172.28.5.60, brokerId: 1, brokerRole: SLAVE}], tags: rocketmq, state: present }

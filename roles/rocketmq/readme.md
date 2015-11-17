@@ -17,5 +17,5 @@ rocket模块
 #Usage
 ```
 roles:  
-- { role: rocketmq, install_path: /usr/local, brokerClusterName: default, brokerName: test, namesrvAddr: '172.28.5.60:9876;172.28.5.59:9876', brokerPort: 10911, storePathRootDir: /data/rocketmq, storePathCommitLog: /data/rocketmq/commitlog, clusters: [{ip: 172.28.5.59, brokerId: 0, brokerRole: ASYNC_MASTER},{ip: 172.28.5.60, brokerId: 1, brokerRole: SLAVE}], tags: rocketmq, state: present }
+- { role: rocketmq, install_path: /usr/local, JAVA_HOME: /usr/local/jdk, brokerClusterName: default, brokerName: test, namesrvAddr: '172.28.5.60:9876;172.28.5.59:9876', brokerPort: 10911, storePathRootDir: /data/rocketmq, storePathCommitLog: /data/rocketmq/commitlog, clusters: [{ip: 172.28.5.59, brokerId: 0, brokerRole: ASYNC_MASTER},{ip: 172.28.5.60, brokerId: 1, brokerRole: SLAVE}], tags: rocketmq, state: present }
 ```
