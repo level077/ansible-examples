@@ -1,0 +1,32 @@
+---
+# The playbook for lvs
+
+- name: yum install ipvsadm keepalived
+  yum: name={{ item }} state={{ state }}
+  with_items:
+    - ipvsadm
+    - keepalived
+  tags: lvs
+
+- name: keepalived config
+  template: src={{ package_path }}/lvs/{{ keepalived_conf }} dest=/etc/keepalived/keepalived.conf
+  when: state != "absent"
+  tags: lvs
+
+- name: lvs_real.sh
+  template: src={{ package_path }}/lvs/{{ lvs_real_sh }} dest=/etc/init.d/lvs_real.sh mode=0755
+  when: state != "absent"
+  tags: lvs 
+
+- name: start keepalived
+  service: name=keepalived state=started enabled=yes
+  when: state != "absent"
+  tags: lvs
+
+- name: rm keepalived.conf
+  file: dest={{ item }} state=absent
+  with_items:
+    - /etc/keepalived/keepalived.conf
+    - /etc/init.d/lvs_real.sh
+  when: state == "absent"
+  tags: lvs
