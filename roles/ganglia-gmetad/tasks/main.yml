@@ -2,7 +2,7 @@
 # The playbook for ganglia-gmetad
 
 - name: yum install ganglia-gmetad
-  yum: name=ganglia-gmetad state={{ state }} 
+  yum: name={{ item }} state={{ state }} 
   with_items:
     - ganglia-gmetad
     - ganglia-web
