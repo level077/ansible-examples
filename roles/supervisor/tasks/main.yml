@@ -1,10 +1,22 @@
 ---
 # The playbook for supervisor
 - name: yum install supervisor
-  yum: name={{ item }} state=present
+  yum: name={{ item }}
   with_items:
-    - supervisor
+    - python-pip
+    - python-meld3
   when: state != "absent"
+  tags: supervisor
+
+- name: pip install supervisor
+  pip: name={{ item }} state={{ state }}
+  with_items:
+     - supervisor
+  tags: supervisor
+
+- name: template supervisord init script
+  template: src=supervisord dest=/etc/init.d/supervisord mode=0755
+  #notify: restart supervisord
   tags: supervisor
 
 - name: deploy supervisord.conf
