@@ -1,0 +1,32 @@
+---
+# The playbook for nrpe
+
+- name: yum install jmagick deps
+  yum: name={{ item }} state=present 
+  with_items:
+    - libtiff-devel
+    - libpng-devel
+    - libjpeg-devel
+    - freetype-devel
+    - jasper-devel
+    - gd-devel
+    - ImageMagick-devel
+  when: state != "absent"
+  tags: jmagick
+
+- name: check jmagick-6.4.0.jar
+  command: ls /usr/local/lib/jmagick-6.4.0.jar
+  register: jmagick_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: jmagick
+
+- name: rsync jmagick to /tmp
+  synchronize: src={{ package_path }}/jmagick/jmagick dest=/tmp
+  when: state == "upgrade" or jmagick_result is defined and jmagick_result.rc != 0
+  tags: jmagick
+
+- name: install script 
+  script: "{{ package_path }}/jmagick/install.sh"
+  when: state == "upgrade" or jmagick_result is defined and jmagick_result.rc != 0
+  tags: jmagick
