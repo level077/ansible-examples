@@ -29,7 +29,7 @@
   tags: nrpe
 
 - name: set check_sas crontab
-  cron: name="check_sas" minute=30 job="/root/check_sas {{ ansible_hostname }} > /dev/null 2>&1" backup=yes state={{ state }}
+  cron: name="check_sas" minute=30 job="/etc/nagios/check_sas {{ ansible_hostname }} > /dev/null 2>&1" backup=yes state={{ state }}
   tags: nrpe
 
 - name: rm check_sas
