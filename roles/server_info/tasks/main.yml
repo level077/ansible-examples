@@ -1,0 +1,28 @@
+---
+# The playbook for server_info
+
+- name: yum install python-argparse
+  yum: name={{ item }} state={{ state }}
+  with_items:
+  - python-argparse 
+  tags: server_info
+
+- name: deploy server_info.py and send_elastic.py
+  template: src={{ item }} dest=/root/bin/ mode=0755
+  with_items:
+  - server_info.py
+  - send_elastic.py
+  when: state != "absent"
+  tags: server_info
+
+- name: set send_elastic.py crontab
+  cron: name="server_info" minute=30 job="/usr/bin/python /root/bin/send_elastic.py -i {{ idc }} -e {{ elastic_host }} -p {{ elastic_port }} > /dev/null 2>&1" backup=yes state={{ state }}
+  tags: server_info
+
+- name: rm server_info.py and send_elastic.py
+  file: dest=/root/bin/{{ item }} state=absent
+  with_items:
+  - server_info.py
+  - send_elastic.py
+  when: state == "absent"
+  tags: server_info
