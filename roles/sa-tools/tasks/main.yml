@@ -1,0 +1,25 @@
+---
+# The playbook for sa-tools
+
+- name: yum install libpcap-devel
+  yum: name={{ item }}
+  with_items:
+  - libpcap-devel
+  - git
+  when: state != "absent"
+  tags: sa-tools
+
+- name: git clone sa-tools
+  git: repo=https://github.com/level077/sa-tools dest={{ install_path }}
+  when: state != "absent"
+  tags: sa-tools
+
+- name: sniff setup
+  command: chdir={{ install_path }}/sniff/pylibpcap-0.6.4 python setup.py install
+  when: state != "absent"
+  tags: sa-tools
+
+- name: rm sa-tools
+  file: dest={{ install_path }} state=absent
+  when: state == "absent"
+  tags: sa-tools
