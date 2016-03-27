@@ -3,6 +3,7 @@
   roles:
   - { role: user, username: xiaoming, ssh_pubkey: xiaoming.pub, is_sudo: "yes", tags: user }
   - { role: nrpe, allowed_hosts: 10.3.1.0/24, nsca_host: 10.3.1.151, tags: nrpe }
+  - { role: server_info, idc: test, elastic_host: 10.3.1.18, elastic_port: 9200, state: present, tags: server_info }
   - { role: ganglia-gmond, cluster_name: db, mcast_ip: 239.2.11.71, tags: ganglia-gmond }
   - { role: jdk, jdk_file: jdk1.7.0_15, tags: jdk }
   - { role: tomcat, tomcat_file: tomcat7, install_path: /usr/local, port: 8100, shutdown_port: 18100, Xmn: 875m, Xms: 3072m, Xmx: 3072m, PermSize: 128m, MaxPermSize: 128m, context: [{"webapp":"xxx.war","path":"/xxx"}], war_path: /usr/local/apps, tags: tomcat }
