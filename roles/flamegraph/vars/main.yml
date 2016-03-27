@@ -1,0 +1,10 @@
+---
+#default variables
+
+package_path: /etc/ansible/packages
+
+#nginx install path of remote server 
+install_path: /usr/local
+
+#install or uninstall(choices: presnet,upgrade,absent. default:present)
+state: present

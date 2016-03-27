@@ -1,0 +1,21 @@
+---
+# The playbook for flamegraph
+
+- name: rsync FlameGraph
+  synchronize: src={{ package_path }}/flamegraph dest={{ install_path }}
+  tags: flamegraph
+
+- name: yum install perf
+  yum: name={{ item }}
+  with_items:
+  - perf
+  - systemtap
+  - kernel-devel
+  tags: flamegraph
+
+- name: yum install kernel-debuginfo
+  yum: name={{ item }}
+  with_items:
+  - "{{ install_path }}/flamegraph/kernel-debuginfo-common-x86_64-{{ kernel }}.rpm"
+  - "{{ install_path }}/flamegraph/kernel-debuginfo-{{ kernel }}.rpm"
+  tags: flamegraph 
