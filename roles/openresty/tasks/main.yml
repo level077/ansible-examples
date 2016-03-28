@@ -15,19 +15,19 @@
   when: state != "absent"
 
 - name: rsync nginx
-  synchronize: src={{ package_path }}/openresty/nginx dest=/tmp
+  synchronize: src={{ package_path }}/openresty/openresty-{{ version }} dest=/tmp
   when: nginx_result is defined and nginx_result.stderr.find('nginx version') == -1 or state == "upgrade" 
 
 - name: configure nginx
-  command: "chdir=/tmp/nginx ./configure --prefix={{ install_path }}"
+  command: "chdir=/tmp/openresty-{{ version }} ./configure --prefix={{ install_path }} --with-stream"
   when: nginx_result is defined and nginx_result.stderr.find('nginx version') == -1 or state == "upgrade"
 
 - name: make nginx
-  command: chdir=/tmp/nginx make -j8
+  command: "chdir=/tmp/openresty-{{ version }} make -j8"
   when: nginx_result is defined and nginx_result.stderr.find('nginx version') == -1 or state == "upgrade"
 
 - name: make install nginx
-  command: chdir=/tmp/nginx make install
+  command: "chdir=/tmp//tmp/openresty-{{ version }} make install"
   when: nginx_result is defined and nginx_result.stderr.find('nginx version') == -1 or state == "upgrade"
 
 - name: deploy {{ conf }}
