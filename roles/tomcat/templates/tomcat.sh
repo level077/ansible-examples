@@ -49,7 +49,7 @@ start()
 	export JAVA_HOME="/usr/local/jdk"
 	export LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 	echo "/bin/sh $tomcat_dir/bin/startup.sh"
-	/bin/sh $tomcat_dir/bin/startup.sh
+	su -s /bin/sh -c "/bin/sh $tomcat_dir/bin/startup.sh" nobody
 }
 
 tailog()

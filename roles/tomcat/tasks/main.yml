@@ -38,6 +38,11 @@
   when: state != "absent"
   tags: tomcat
 
+- name: chown -R nobody:nobody tomcat_{{ port }}
+  command: chown -R nobody:nobody {{ install_path }}/tomcat/tomcat_{{ port }}
+  when: state != "absent"
+  tags: tomcat
+
 - name: Create {{ war_path }} dir
   file: path={{ war_path }} state=directory
   when: state != "absent"
