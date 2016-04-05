@@ -24,3 +24,4 @@
   - { role: lvs, keepalived_conf: keepalived.conf, lvs_real_sh: lvs_real.sh, state: present, tags: lvs } 
   - { role: flamegraph, install_path: /usr/local, kernel: 2.6.32-573.el6.x86_64, tags: flamegraph}
   - { role: sa-tools, install_path: /usr/local/sa-tools, tags: sa-tools, state: present }
+  - { role: dns, nameserver: ["10.3.1.5","10.3.1.6"], state: present, tags: dns }
