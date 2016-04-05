@@ -21,7 +21,7 @@
 
 - name: deploy supervisord.conf
   template: src=supervisord.conf  dest=/etc/supervisord.conf
-  notify: restart supervisord
+  #notify: restart supervisord
   when: state != "absent"
   tags: supervisor
 
@@ -37,7 +37,7 @@
 
 - name: deploy {{ service }} conf
   template: src=service.conf dest=/etc/supervisord/{{ service }}.conf
-  notify: restart supervisord
+  #notify: restart supervisord
   when: state != "absent"
   tags: supervisor
 
