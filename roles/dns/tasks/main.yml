@@ -1,0 +1,6 @@
+---
+# The playbook for dns
+- name: deploy dns
+  template: src=resolv.conf dest=/etc/ mode=0644 backup=yes
+  when: state != "absent"
+  tags: dns
