@@ -17,7 +17,6 @@ CLIEXEC={{ install_path }}/redis/bin/redis-cli
 DATADIR={{ db_path }}/redis/{{ port }} 
 [ ! -d $DATADIR ] && mkdir -p $DATADIR
 
-PIDFILE=/var/run/redis_{{ port }}.pid
 CONF="{{ install_path }}/redis/conf/redis_{{ port }}.conf"
 
 start() {
@@ -34,7 +33,6 @@ start() {
 
 stop() {
 	echo -n $"Stopping $prog: "
-	PID=$(ps xau  | grep redis_{{ port }} | grep -v grep | awk  '{print $2}')
 	$CLIEXEC -p $REDISPORT shutdown
 	RETVAL=$?
         echo
