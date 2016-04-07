@@ -34,13 +34,8 @@ start() {
 
 stop() {
 	echo -n $"Stopping $prog: "
-	PID=$(cat $PIDFILE)
+	PID=$(ps xau  | grep redis_{{ port }} | grep -v grep | awk  '{print $2}')
 	$CLIEXEC -p $REDISPORT shutdown
-	while [ -x /proc/${PID} ]
-        do
-        	echo "Waiting for Redis to shutdown ..."
-                sleep 1
-       	done
 	RETVAL=$?
         echo
         [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/$prog
