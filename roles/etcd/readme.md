@@ -6,6 +6,8 @@ etcd模块
 * install_path: etcd部署目录，{{ install_path }}/etcd
 * state: present或者absent
 * version: 要部署etcd的版本，为{{ package_path }}/etcd/etcd-v{{ version }}-linux-amd64
+* cluster_init: etcd集群信息
+* cluster_token: 集群token
  
 
 #Usage
