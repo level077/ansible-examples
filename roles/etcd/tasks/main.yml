@@ -1,0 +1,32 @@
+---
+# The playbook for etcd
+
+- name: check etcd
+  command: "{{ install_path }}/etcd/etcd --help"
+  register: etcd_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: etcd
+
+- name: rsync etcd-{{ version }}
+  synchronize: src={{ package_path }}/etcd/etcd-v{{ version }}-linux-amd64 dest={{ install_path }}
+  when: etcd_result is defined and etcd_result.rc !=0 or state == "upgrade"
+  tags: etcd
+
+- name: ln -s {{ install_path }}/etcd-v{{ version }}-linux-amd64 {{ install_path }}/etcd
+  file: src={{ install_path }}/etcd-v{{ version }}-linux-amd64 dest={{ install_path }}/etcd state=link
+  when: state != "absent"
+  tags: etcd
+
+- name: deploy start.sh
+  template: src=start.sh dest={{ install_path }}/etcd/ mode=0755
+  when: state != "absent"
+  tags: etcd
+
+- name: rm {{ install_path }}/etcd-v{{ version }}-linux-amd64 {{ install_path }}/etcd
+  file: dest={{ item }} state=absent
+  with_items:
+  - "{{ install_path }}/etcd-v{{ version }}-linux-amd64"
+  - "{{ install_path }}/etcd"
+  when: state == "absent"
+  tags: etcd
