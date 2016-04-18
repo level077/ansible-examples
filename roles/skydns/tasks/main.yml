@@ -1,0 +1,26 @@
+---
+# The playbook for skydns
+
+- name: check skydns
+  command: "{{ install_path }}/skydns/skydns -version"
+  register: skydns_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: skydns
+
+- name: rsync skydns
+  synchronize: src={{ package_path }}/skydns/skydns dest={{ install_path }}
+  when: skydns_result is defined and skydns_result.rc !=0 or state == "upgrade"
+  tags: skydns
+
+- name: deploy start.sh
+  template: src=start.sh dest={{ install_path }}/skydns/ mode=0755
+  when: state != "absent"
+  tags: skydns
+
+- name: rm {{ install_path }}/skydns
+  file: dest={{ item }} state=absent
+  with_items:
+  - "{{ install_path }}/skydns"
+  when: state == "absent"
+  tags: skydns
