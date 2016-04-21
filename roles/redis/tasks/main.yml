@@ -56,7 +56,7 @@
   tags: redis
 
 - name: deploy redis-trib.rb
-  template: src=redis-trib.rb dest={{ install_path }}/redis/bin mode=0755
+  synchronize: src={{ package_path }}/redis/redis-{{ redis_version }}/src/redis-trib.rb dest={{ install_path }}/redis/bin mode=0755
   when: state != "absent"
   tags: redis
 
