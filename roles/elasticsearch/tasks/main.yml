@@ -1,0 +1,60 @@
+---
+# The playbook for elasticsearch deploy
+
+- name: Deploy elasticsearch
+  synchronize: src={{ package_path }}/elasticsearch/elasticsearch-{{ version }} dest={{ install_path }}
+  when: state != "absent"
+  tags: elasticsearch
+
+- name: ln -s {{ install_path }}/elasticsearch_{{ version }} {{ install_path }}/elasticsearch
+  file: src={{ install_path }}/elasticsearch-{{ version }} dest={{ install_path }}/elasticsearch state=link
+  when: state != "absent"
+  tags: elasticsearch
+
+- name: deploy elasticsearch.yml
+  template: src=elasticsearch.yml dest={{ install_path }}/elasticsearch/config/
+  when: state != "absent"
+  tags: elasticsearch
+
+- name: deploy init script
+  template: src=elasticsearch dest=/etc/init.d/elasticsearch mode=0755
+  when: state != "absent"
+
+- name: mkdir {{ path_log }}
+  file: dest={{ path_log }} state=directory
+  when: state != "absent"
+  
+- name: mkdir {{ path_data }}
+  file: dest={{ path_data }} state=directory
+  when: state != "absent"
+
+- name: chown -R nobody:nobody {{ install_path }}/elasticsearch
+  command: chown -R nobody:nobody {{ install_path }}/elasticsearch {{ install_path }}/elasticsearch-{{ version }} 
+  when: state != "absent"
+
+- name: start elasticsearch service
+  service: name=elasticsearch enabled=yes state=started
+  when: state != "absent"
+  tags: elasticsearch
+
+- name: stop elasticsearch service
+  service: name=elasticsearch state=stopped
+  when: state == "absent"
+  register: es_result
+  ignore_errors: true
+  tags: elasticsearch
+
+- name: rm init script
+  file:  dest=/etc/init.d/elasticsearch state=absent
+  when: state == "absent"
+  tags: elasticsearch
+
+- name: rm elasticsearch symbolic link
+  file: dest={{ install_path }}/elasticsearch state=absent
+  when:  state  == "absent"
+  tags: elasticsearch
+
+- name: rm elasticsearch
+  file: dest={{ install_path }}/elasticsearch-{{ version }} state=absent
+  when:  state == "absent"
+  tags: elasticsearch
