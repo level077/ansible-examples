@@ -36,8 +36,8 @@ DD=`date -d -1hour +%d`
 HH=`date -d now +%H`
 backup_dir="{{ mysql_backup_path }}/$YY/$MM"
 [ ! -d "$backup_dir" ] && mkdir -p $backup_dir
-user="backup"
-passwd="xxxx"
+user="{{ backup_user }}"
+passwd="{{ backup_password }}"
 sql_file="$backup_dir/$host-$port-$YY-$MM-$DD.$HH.sql"
 mysqldump="{{ mysql_path}}/bin/mysqldump"
 
