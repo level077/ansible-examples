@@ -2,8 +2,16 @@
 # The role for mkfs
 
 # mkfs and mount
+
+- name: install xfsprogs
+  yum: name={{ item }} state={{ state }}
+  with_items:
+  - xfsprogs
+  when: fstype == "xfs"
+  tags: mkfs
+
 - name: mkfs
-  filesystem: fstype={{ fstype }} dev={{ dev }}
+  filesystem: fstype={{ fstype }} dev={{ dev }} force={{ force }}
   when: state != "absent"
   tags: mkfs
 

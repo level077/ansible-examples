@@ -6,9 +6,10 @@ mkfs模块，用户格式化硬盘，并且挂载
 * state: present或者absent
 * dev: 磁盘分区
 * mount_dir: 挂载点
+* force: yes or no
 
 #Usage
 ```
 roles:  
-- { role: mkfs, fstype: xfs, dev: /dev/sdb, mount_dir: /data }
+- { role: mkfs, fstype: xfs, dev: /dev/sdb, mount_dir: /datai, force: no }
 ```
