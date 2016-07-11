@@ -5,7 +5,7 @@ use Data::Dumper;
 my $result;
 my $slot;
 my $hostname = shift;
-my $megacli = "/opt/MegaRAID/MegaCli/MegaCli64";
+my $megacli = "/usr/sbin/storcli";
 die "$megacli do not exist" unless -e $megacli;
 my $send_cmd = "/usr/sbin/send_nsca -H {{ nsca_host }} -d ';' -c /etc/nagios/send_nsca.cfg";
 
