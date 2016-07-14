@@ -20,6 +20,7 @@ RETVAL=0
 
 start() {
 	ulimit -HSn 65536
+	ulimit -HSu 65536
 	echo never > /sys/kernel/mm/transparent_hugepage/enabled
 	echo never > /sys/kernel/mm/transparent_hugepage/defrag
         echo -n $"Starting $prog: "
