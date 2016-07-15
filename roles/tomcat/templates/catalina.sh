@@ -95,7 +95,7 @@
 #                   LOGGING_MANAGER="-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager"
 # -----------------------------------------------------------------------------
 
-JAVA_OPTS="$JAVA_OPTS -Xmn{{ Xmn }} -Xms{{ Xms }} -Xmx{{ Xmx }} -XX:PermSize={{ PermSize }} -XX:MaxPermSize={{ MaxPermSize }}  -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:MaxTenuringThreshold=16 -XX:+ExplicitGCInvokesConcurrent  -XX:+CMSParallelRemarkEnabled -XX:+PrintTenuringDistribution -XX:+PrintGCDateStamps -XX:StringTableSize=10000"
+JAVA_OPTS="$JAVA_OPTS -Xmn{{ Xmn }} -Xms{{ Xms }} -Xmx{{ Xmx }} -XX:PermSize={{ PermSize }} -XX:MaxPermSize={{ MaxPermSize }}  -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:MaxTenuringThreshold=16 -XX:+ExplicitGCInvokesConcurrent  -XX:+CMSParallelRemarkEnabled -XX:+PrintTenuringDistribution -XX:+PrintGCDateStamps -XX:StringTableSize=10000 -XX:-OmitStackTraceInFastThrow"
 
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false
