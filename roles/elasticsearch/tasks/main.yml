@@ -23,9 +23,17 @@
 - name: mkdir {{ path_log }}
   file: dest={{ path_log }} state=directory
   when: state != "absent"
-  
+
+- name: chown -R nobody:nobody {{ path_log }}
+  command: chown -R nobody:nobody {{ path_log }}
+  when: state != "absent"
+
 - name: mkdir {{ path_data }}
   file: dest={{ path_data }} state=directory
+  when: state != "absent"
+
+- name: chown -R nobody:nobody {{ path_data }}
+  command: chown -R nobody:nobody {{ path_data }}
   when: state != "absent"
 
 - name: chown -R nobody:nobody {{ install_path }}/elasticsearch
