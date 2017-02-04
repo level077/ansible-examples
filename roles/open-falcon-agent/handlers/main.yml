@@ -1,0 +1,4 @@
+---
+
+- name: restart agent
+  command: chdir={{ install_path }}/agent ./control restart

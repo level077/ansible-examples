@@ -1,0 +1,47 @@
+---
+# The playbook for falcon-agent
+
+- name: check falcon-agent
+  command: "{{ install_path }}/agent/falcon-agent -v"
+  register: agent_result
+  ignore_errors: true
+  when: state != "absent"
+  tags: falcon-agent
+
+- name: rsync falcon-agent-{{ version }}
+  synchronize: src={{ package_path }}/open-falcon/falcon-agent-{{ version }}.tar.gz dest=/tmp
+  when: agent_result is defined and agent_result.rc !=0 or state == "upgrade"
+  tags: falcon-agent
+
+- name: create {{ install_path }}/agent
+  file: dest={{ install_path }}/agent state=directory
+  when: agent_result is defined and agent_result.rc !=0 or state == "upgrade"
+  tags: falcon-agent
+
+- name: tar xvzf falcon-agent
+  command: chdir=/tmp tar xvzf falcon-agent-{{ version }}.tar.gz -C {{ install_path }}/agent 
+  when: state == "upgrade" or agent_result is defined and agent_result.rc != 0
+  tags: falcon-agent
+
+- name: deploy cfg.json
+  template: src=cfg.json dest={{ install_path }}/agent/
+  when: state != "absent"
+  notify: restart agent
+  tags: falcon-agent
+
+- name: start falcon-agent
+  command: chdir={{ install_path }}/agent ./control start
+  when: state != "absent"
+  tags: falcon-agent
+  ignore_errors: true
+
+- name: stop falcon-agent
+  command: chdir={{ install_path }}/agent ./control stop
+  when: state == "absent" 
+  ignore_errors: true
+  tags: falcon-agent
+
+- name: rm falcon-agent
+  file: dest={{ install_path }}/agent state=absent
+  when: state == "absent"
+  tags: falcon-agent
