@@ -22,5 +22,5 @@ roles:
 Note   
 ====
 * 执行完后并没有部署kube-dns，待k8s_node部署完后，再手动部署kube-dns
-* 建议先在node上下载好kube-dns需要的镜像，或者在node的/etc/hosts中绑定61.91.161.217 gcr.io
+* 建议先在node上下载好kube-dns需要的镜像，或者在node的/etc/hosts中绑定 61.91.161.217 gcr.io
 * kube-dns部署文件在master的/usr/local/src下：kubedns-controller.yaml.sed，kubedns-svc.yaml.sed
