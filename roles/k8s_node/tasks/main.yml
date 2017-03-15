@@ -1,0 +1,56 @@
+---
+# The playbook for redis
+
+- name: yum install kubernetes flannel
+  yum: name={{ item }} state={{ state }}
+  with_items:
+  - kubernetes
+  - flannel
+  tags: k8s_node
+
+- name: mkdir /etc/kubernetes
+  file: path=/etc/kubernetes state=directory
+  tags: k8s_node
+
+- name: deploy /etc/kubernetes/config
+  template: src=config dest=/etc/kubernetes/config mode=0644
+  tags: k8s_node
+
+- name: deploy /etc/sysconfig/flanneld
+  template: src=flanneld dest=/etc/sysconfig/flanneld
+  tags: k8s_node
+
+- name: deploy /etc/kubernetes/kubelet
+  template: src=kubelet dest=/etc/kubernetes/kubelet
+  tags: k8s_node
+
+- name: disable selinux 
+  command: setenforce 0
+  ignore_errors: true 
+  tags: k8s_node
+
+- name: disable firewalld
+  command: systemctl disable firewalld
+  tags: k8s_node
+
+- name: stop firewalld
+  command: systemctl stop firewalld
+  tags: k8s_node
+
+- name: kube-proxy kubelet flanneld docker
+  command: systemctl enable {{ item }}
+  with_items:
+  - kube-proxy
+  - kubelet
+  - docker
+  - flanneld
+  tags: k8s_node
+
+- name: start  kube-proxy kubelet flanneld docker
+  command: systemctl restart {{ item }}
+  with_items:
+  - kube-proxy
+  - kubelet
+  - docker
+  - flanneld
+  tags: k8s_node

@@ -1,0 +1,87 @@
+---
+# The playbook for redis
+
+- name: yum install kubernetes etcd flannel
+  yum: name={{ item }} state={{ state }}
+  with_items:
+  - kubernetes
+  - etcd
+  - flannel
+  tags: k8s_master
+
+- name: mkdir /etc/kubernetes
+  file: path=/etc/kubernetes state=directory
+  tags: k8s_master
+
+- name: deploy /etc/kubernetes/config
+  template: src=config dest=/etc/kubernetes/config mode=0644
+  tags: k8s_master
+
+- name: deploy /etc/kubernetes/apiserver
+  template: src=apiserver dest=/etc/kubernetes/apiserver mode=0644
+  tags: k8s_master
+
+- name: deploy /etc/kubernetes/controller-manager
+  template: src=controller-manager dest=/etc/kubernetes/controller-manager mode=0644
+  tags: k8s_master
+
+- name: deploy /etc/etcd/etcd.conf
+  template: src=etcd.conf dest=/etc/etcd/etcd.conf mode=0644
+  tags: k8s_master
+
+- name: deploy set_pod_network.sh
+  template: src=set_pod_network.sh dest=/etc/etcd/set_pod_network.sh mode=0755
+  tags: k8s_master
+
+- name: deploy /etc/sysconfig/flanneld
+  template: src=flanneld dest=/etc/sysconfig/flanneld
+  tags: k8s_master
+
+- name: deploy kubedns-controller.yaml.sed kubedns-svc.yaml.sed
+  template: src={{ item }} dest=/usr/local/src mode=0644
+  with_items:
+  - kubedns-controller.yaml.sed
+  - kubedns-svc.yaml.sed
+  tags: k8s_master
+
+- name: disable selinux 
+  command: setenforce 0
+  ignore_errors: true 
+  tags: k8s_master
+
+- name: disable firewalld
+  command: systemctl disable firewalld
+  tags: k8s_master
+
+- name: stop firewalld
+  command: systemctl stop firewalld
+  tags: k8s_master
+
+- name: start etcd
+  command: systemctl start etcd
+  tags: k8s_master
+
+- name: sh set_pod_network.sh
+  command: /bin/sh /etc/etcd/set_pod_network.sh
+  ignore_errors: true
+  tags: k8s_master
+  
+- name: enable etcd kube-apiserver kube-controller-manager kube-scheduler flanneld
+  command: systemctl enable {{ item }}
+  with_items:
+  - etcd
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  - flanneld
+  tags: k8s_master
+
+- name: start etcd kube-apiserver kube-controller-manager kube-scheduler flanneld
+  command: systemctl restart {{ item }}
+  with_items:
+  - etcd
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  - flanneld
+  tags: k8s_master
