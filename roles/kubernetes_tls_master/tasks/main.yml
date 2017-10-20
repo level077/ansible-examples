@@ -1,0 +1,164 @@
+---
+- name: mkdir /root/ssl
+  file: path=/root/ssl state=directory
+  delegate_to: localhost
+  tags: k8s_tls
+
+- name: copy csr config to /root/ssl
+  template: src={{ item }} dest=/root/ssl
+  delegate_to: localhost
+  with_items:
+  - ca-csr.json
+  - ca-config.json
+  - kubernetes-csr.json
+  - admin-csr.json
+  - kube-proxy-csr.json
+  - gen_cert.sh
+  - gen_kubeconfig.sh
+  tags: k8s_tls 
+
+- name: deploy  cfssl
+  #synchronize: src={{ package_path }}/kubernetes/{{ item }} dest=/root/ssl
+  shell: cp {{ package_path }}/kubernetes/cfssl* /root/ssl
+  delegate_to: localhost
+  with_items:
+  - cfssl_linux-amd64
+  - cfssljson_linux-amd64
+  - cfssl-certinfo_linux-amd64 
+  tags: k8s_tls
+
+- name: gen cert
+  shell: /bin/sh /root/ssl/gen_cert.sh
+  delegate_to: localhost
+  tags: k8s_tls
+
+- name: gen kubeconfig token.csv
+  shell: chdir=/root/ssl /bin/sh gen_kubeconfig.sh
+  delegate_to: localhost
+  tags: k8s_tls
+
+- name: mkdir /etc/kubernetes
+  file: path=/etc/kubernetes state=directory
+  tags: k8s_tls
+
+- name: mkdir /etc/kubernetes/ssl
+  file: path=/etc/kubernetes/ssl state=directory
+  tags: k8s_tls
+
+- name: deploy cert
+  #shell: cp /root/ssl/*.pem /etc/kubernetes/ssl
+  synchronize: src=/root/ssl/{{ item }} dest=/etc/kubernetes/ssl
+  with_items:
+  - ca.pem
+  - ca-key.pem
+  - kubernetes.pem
+  - kubernetes-key.pem
+  tags: k8s_tls
+
+- name: deploy token.csv
+  synchronize: src=/root/ssl/token.csv dest=/etc/kubernetes
+  tags: k8s_tls
+
+- name: create /root/.kube
+  file: path=/root/.kube state=directory
+  tags: k8s_tls
+
+- name: deploy kubect.kubeconfig
+  synchronize: src=/root/ssl/{{ item }} dest=/root/.kube/config
+  with_items:
+  - kubectl.kubeconfig
+  tags: k8s_tls
+
+- name: rsync kubectl kube-apiserver kube-scheduler kube-controoler-manager
+  synchronize: src={{ package_path }}/kubernetes/{{ version }}/{{ item }} dest=/usr/bin
+  with_items:
+  - kubectl
+  - kube-apiserver
+  - kube-scheduler
+  - kube-controller-manager
+  tags: k8s_tls
+
+- name: yum install etcd
+  yum: name=etcd
+  tags: k8s_tls
+
+- name: deploy /etc/etcd/etcd.conf
+  template: src={{ item }} dest=/etc/etcd mode=0644
+  with_items:
+  - etcd.conf
+  - set_pod_network.sh
+  tags: k8s_master
+
+- name: disable selinux
+  command: setenforce 0
+  ignore_errors: true
+  tags: k8s_tls
+
+- name: disable firewalld
+  command: systemctl disable firewalld
+  tags: k8s_tls
+
+- name: stop firewalld
+  command: systemctl stop firewalld
+  tags: k8s_tls
+
+- name: start etcd
+  command: systemctl start etcd
+  tags: k8s_tls
+
+- name: sh set_pod_network.sh
+  command: /bin/sh /etc/etcd/set_pod_network.sh
+  ignore_errors: true
+  tags: k8s_tls
+
+- name: deploy kube-apiserver kube-controller-manager kube-scheduler systemd service
+  template: src={{ item }} dest=/usr/lib/systemd/system
+  with_items:
+  - kube-apiserver.service
+  - kube-controller-manager.service
+  - kube-scheduler.service 
+  tags: k8s_tls
+
+- name: deploy kube-apiserver kube-controller-manager kube-scheduler config
+  template: src={{ item }} dest=/etc/kubernetes
+  with_items:
+  - config
+  - apiserver
+  - controller-manager
+  - scheduler
+  tags: k8s_tls
+
+- name: enable kube-apiserver kube-controller-manager kube-scheduler
+  command: systemctl enable {{ item }}
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  tags: k8s_tls
+
+- name: start kube-apiserver kube-controller-manager kube-scheduler
+  command: systemctl restart {{ item }}
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  tags: k8s_tls
+
+- name: deploy clusterrolebindings.yml
+  template: src={{ item }} dest=/usr/local/src
+  with_items:
+  - clusterrolebindings.yml
+  tags: k8s_tls 
+
+- name: kubectl apply -f /usr/local/src/clusterrolebindings.yml
+  shell: kubectl apply -f /usr/local/src/clusterrolebindings.yml
+  tags: k8s_tls
+
+- name: deploy kubedns
+  template: src={{ item }} dest=/usr/local/src
+  with_items:
+  - kubedns-cm.yaml
+  - kubedns-sa.yaml
+  - kubedns-controller.yaml.sed
+  - kubedns-svc.yaml.sed
+  tags: k8s_tls
