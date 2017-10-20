@@ -1,6 +1,6 @@
 Description
 ===========
-kubernetes_tls_master模块，带了kube-dns部署脚本kubedns-cm.yaml， kubedns-sa.yaml，kubedns-controller.yaml.sed，kubedns-svc.yaml.sed。与另外一个k8s_master模块不同的是，前者是纯yum部署。该模块是自行创建需要的key，且开启RBAC。
+kubernetes_tls_master模块，带了kube-dns部署脚本kubedns-cm.yaml， kubedns-sa.yaml，kubedns-controller.yaml.sed，kubedns-svc.yaml.sed。该模块是自行创建需要的key，且开启RBAC。另外一个k8s_master是纯yum部署，版本更新不及时。
 
 Pre-install
 ===========
@@ -11,7 +11,7 @@ Args
 =============
 * kubernetes_hosts: kube-apiserver部署的机器IP，或者其他域名，用户https的域名验证
 * kube_apiserver: kube-apiserver的IP
-* version: kubenetest版本
+* version: kubenetes版本
 * flannel_etcd_prefix: flannel需要的网络配置etcd路径 
 * flannel_network_type: flannel网络类型，可以是vxlan，host-gw等
 * pod_ip_range: pod网段
