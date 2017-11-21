@@ -15,11 +15,11 @@
   - kube-proxy-csr.json
   - gen_cert.sh
   - gen_kubeconfig.sh
+  - gen_token.sh
   tags: k8s_tls 
 
 - name: deploy  cfssl
-  #synchronize: src={{ package_path }}/kubernetes/{{ item }} dest=/root/ssl
-  shell: cp {{ package_path }}/kubernetes/cfssl* /root/ssl
+  copy: src={{ package_path }}/kubernetes/{{ item }} dest=/root/ssl mode=0755
   delegate_to: localhost
   with_items:
   - cfssl_linux-amd64
@@ -32,9 +32,15 @@
   delegate_to: localhost
   tags: k8s_tls
 
-- name: gen kubeconfig token.csv
+- name: gen token.csv
+  shell: /bin/sh /root/ssl/gen_token.sh
+  delegate_to: localhost
+  tags: k8s_tls
+
+- name: gen kubeconfig
   shell: chdir=/root/ssl /bin/sh gen_kubeconfig.sh
   delegate_to: localhost
+  ignore_errors: true
   tags: k8s_tls
 
 - name: mkdir /etc/kubernetes
@@ -152,6 +158,7 @@
 
 - name: kubectl apply -f /usr/local/src/clusterrolebindings.yml
   shell: kubectl apply -f /usr/local/src/clusterrolebindings.yml
+  ignore_errors: true
   tags: k8s_tls
 
 - name: deploy kubedns
