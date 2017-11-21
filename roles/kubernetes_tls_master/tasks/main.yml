@@ -70,7 +70,7 @@
   tags: k8s_tls
 
 - name: rsync kubectl kube-apiserver kube-scheduler kube-controoler-manager
-  synchronize: src={{ package_path }}/kubernetes/{{ version }}/{{ item }} dest=/usr/bin
+  synchronize: src={{ package_path }}/kubernetes/{{ kubernetes_version }}/{{ item }} dest=/usr/bin
   with_items:
   - kubectl
   - kube-apiserver

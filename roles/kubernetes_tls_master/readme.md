@@ -11,7 +11,7 @@ Args
 =============
 * kubernetes_hosts: kube-apiserver部署的机器IP，或者其他域名，用户https的域名验证
 * kube_apiserver: kube-apiserver的IP
-* version: kubenetes版本
+* kubernetes_version: kubenetes版本
 * flannel_etcd_prefix: flannel需要的网络配置etcd路径 
 * flannel_network_type: flannel网络类型，可以是vxlan，host-gw等
 * pod_ip_range: pod网段
@@ -20,12 +20,13 @@ Args
 * service_ip_range: service网段 
 * cluster_dns: kube-dns service服务地址，service_ip_range中的IP
 * cluster_domain: kubernetes集群内的域名后缀
+* storage_backend: 使用etcd的v2或者v3协议，默认是etcd2
 
 Usage
 ===========
 ```
 roles:  
-- { role: kubernetes_tls_master, kubernetes_hosts: ['192.168.1.1'], kube_apiserver: 192.168.1.1, version: 1.8.1, flannel_etcd_prefix: /kube-centos/network, pod_ip_range: 172.30.0.0/16, flannel_network_type: vxlan, etcd_servers: '192.168.1.1:2379', service_ip_range: 10.254.0.0/16, cluster_dns: 10.254.0.2, cluster_domain: cluster.local }
+- { role: kubernetes_tls_master, kubernetes_hosts: ['192.168.1.1'], kube_apiserver: 192.168.1.1, kubernetes_version: 1.8.1, flannel_etcd_prefix: /kube-centos/network, pod_ip_range: 172.30.0.0/16, flannel_network_type: vxlan, etcd_servers: '192.168.1.1:2379', service_ip_range: 10.254.0.0/16, cluster_dns: 10.254.0.2, cluster_domain: cluster.local, storage_backend: etcd2 }
 ```
 
 Post-install

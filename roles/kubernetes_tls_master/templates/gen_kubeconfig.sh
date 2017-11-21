@@ -1,6 +1,6 @@
 #!/bin/sh
 cd /root/ssl
-KUBECTL={{ package_path }}/kubernetes/{{ version }}/kubectl
+KUBECTL={{ package_path }}/kubernetes/{{ kubernetes_version }}/kubectl
 KUBE_APISERVER="https://{{ kube_apiserver }}:6443"
 BOOTSTRAP_TOKEN=$(head -c 16 /dev/urandom | od -An -t x | tr -d ' ')
 
