@@ -41,7 +41,7 @@
   tags: k8s_tls_node
 
 - name: rsync kubectl kubelet kube-proxy
-  synchronize: src={{ package_path }}/kubernetes/{{ version }}/{{ item }} dest=/usr/bin
+  synchronize: src={{ package_path }}/kubernetes/{{ kubernetes_version }}/{{ item }} dest=/usr/bin
   with_items:
   - kubectl
   - kubelet
