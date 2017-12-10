@@ -2,16 +2,14 @@
 etcd模块
 
 #Args
-* package_path: 本例为/etc/ansible/packages 
-* install_path: etcd部署目录，{{ install_path }}/etcd
-* state: present或者absent
-* version: 要部署etcd的版本，为{{ package_path }}/etcd/etcd-v{{ version }}-linux-amd64
-* cluster_init: etcd集群信息
-* cluster_token: 集群token
- 
+* etcd_cluster: etcd static cluster配置
+* etcd_token: etcd token
+* etcd_data_dir: etcd data dir
+* etcd_state: new or exist
+* state: absent or present
 
 #Usage
 ```
-roles:  
-- { role: etcd, install_path: /usr/local, version: 2.3.0, cluster_init: "default=http://10.3.1.1:2380,default=http://10.3.1.2:2380,default=http://10.3.1.3:2380", cluster_token: test, state: present, tags: etcd }
+roles:
+- { role: etcd, etcd_cluster: "infra1=http://10.1.1.30:2380,infra2=http://10.1.1.28:2380,infra3=http://10.1.1.27:2380", etcd_token: test, etcd_state: new, etcd_data_dir: /data, state: present, tags: etcd }
 ```

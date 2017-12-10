@@ -1,32 +1,23 @@
 ---
-# The playbook for etcd
+- name: yum install etcd
+  yum: name=etcd state={{ state }}
+  tags: etcd
 
-- name: check etcd
-  command: "{{ install_path }}/etcd/etcd --help"
-  register: etcd_result
-  ignore_errors: true
+- name: mkdir {{ etcd_data_dir }}/etcd
+  file: path={{ etcd_data_dir }}/etcd owner=etcd group=etcd state=directory
+  when: state != "absent"
+
+- name: deploy etcd.conf
+  template: src=etcd.conf dest=/etc/etcd/ mode=0644
   when: state != "absent"
   tags: etcd
 
-- name: rsync etcd-{{ version }}
-  synchronize: src={{ package_path }}/etcd/etcd-v{{ version }}-linux-amd64 dest={{ install_path }}
-  when: etcd_result is defined and etcd_result.rc !=0 or state == "upgrade"
-  tags: etcd
-
-- name: ln -s {{ install_path }}/etcd-v{{ version }}-linux-amd64 {{ install_path }}/etcd
-  file: src={{ install_path }}/etcd-v{{ version }}-linux-amd64 dest={{ install_path }}/etcd state=link
+- name: deploy etcd.service
+  template: src=etcd.service dest=/usr/lib/systemd/system/ mode=0644
   when: state != "absent"
   tags: etcd
 
-- name: deploy start.sh
-  template: src=start.sh dest={{ install_path }}/etcd/ mode=0755
+- name: start etcd
+  service: name=etcd enabled=yes state=started
   when: state != "absent"
-  tags: etcd
-
-- name: rm {{ install_path }}/etcd-v{{ version }}-linux-amd64 {{ install_path }}/etcd
-  file: dest={{ item }} state=absent
-  with_items:
-  - "{{ install_path }}/etcd-v{{ version }}-linux-amd64"
-  - "{{ install_path }}/etcd"
-  when: state == "absent"
   tags: etcd
