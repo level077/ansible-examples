@@ -84,14 +84,14 @@
   - kube-controller-manager
   tags: k8s_tls
 
-- name: yum install etcd
-  yum: name=etcd
-  tags: k8s_tls
+#- name: yum install etcd
+#  yum: name=etcd
+#  tags: k8s_tls
 
 - name: deploy /etc/etcd/etcd.conf
   template: src={{ item }} dest=/etc/etcd mode=0644
   with_items:
-  - etcd.conf
+  #- etcd.conf
   - set_pod_network.sh
   tags: k8s_master
 
