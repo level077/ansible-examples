@@ -1,4 +1,4 @@
 KUBELET_ADDRESS="--address=0.0.0.0"
 KUBELET_HOSTNAME="--hostname-override={{ ansible_host }}"
 KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=registry.access.redhat.com/rhel7/pod-infrastructure:latest"
-KUBELET_ARGS="--cgroup-driver=systemd --cluster-dns={{ cluster_dns }} --bootstrap-kubeconfig=/etc/kubernetes/bootstrap.kubeconfig --kubeconfig=/etc/kubernetes/kubelet.kubeconfig --cert-dir=/etc/kubernetes/ssl --cluster-domain={{ cluster_domain }} --hairpin-mode promiscuous-bridge --serialize-image-pulls=false"
+KUBELET_ARGS="--cgroup-driver=systemd --cluster-dns={{ cluster_dns }} --bootstrap-kubeconfig=/etc/kubernetes/bootstrap.kubeconfig --kubeconfig=/etc/kubernetes/kubelet.kubeconfig --cert-dir=/etc/kubernetes/ssl --cluster-domain={{ cluster_domain }} --hairpin-mode=promiscuous-bridge --serialize-image-pulls=false"
