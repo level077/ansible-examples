@@ -87,8 +87,16 @@
   shell: swapoff -a
   tags: k8s_tls_node
 
+- name: set docker0 promisc on
+  shell: ip link set docker0 promisc on
+  tags: k8s_tls_node
+
 - name: swapoff add to /etc/rc.local
   lineinfile: path=/etc/rc.local line='swapoff -a' state=present
+  tags: k8s_tls_node
+
+- name: set docker0 promisc on to /etc/rc.local
+  lineinfile: path=/etc/rc.local line='ip link set docker0 promisc on' state=present
   tags: k8s_tls_node
 
 - name: mkdir kubelet working directory /var/lib/kubelet
