@@ -9,6 +9,7 @@
 
 - name: deploy etcd.conf
   template: src=etcd.conf dest=/etc/etcd/ mode=0644
+  notify: restart etcd
   when: state != "absent"
   tags: etcd
 
