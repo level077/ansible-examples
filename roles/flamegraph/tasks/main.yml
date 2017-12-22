@@ -16,6 +16,6 @@
 - name: yum install kernel-debuginfo
   yum: name={{ item }}
   with_items:
-  - "{{ install_path }}/flamegraph/kernel-debuginfo-common-x86_64-{{ kernel }}.rpm"
-  - "{{ install_path }}/flamegraph/kernel-debuginfo-{{ kernel }}.rpm"
+  - "{{ package_path }}/flamegraph/kernel-debuginfo-common-x86_64-{{ kernel }}.rpm"
+  - "{{ package_path }}/flamegraph/kernel-debuginfo-{{ kernel }}.rpm"
   tags: flamegraph 
