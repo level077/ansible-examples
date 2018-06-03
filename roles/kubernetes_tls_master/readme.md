@@ -26,7 +26,7 @@ Usage
 ===========
 ```
 roles:  
-- { role: kubernetes_tls_master, kubernetes_hosts: ['192.168.1.1'], kube_apiserver: 192.168.1.1, kubernetes_version: 1.8.1, flannel_etcd_prefix: /kube-centos/network, pod_ip_range: 172.30.0.0/16, flannel_network_type: vxlan, etcd_servers: '192.168.1.1:2379', service_ip_range: 10.254.0.0/16, cluster_dns: 10.254.0.2, cluster_domain: cluster.local, storage_backend: etcd2 }
+- { role: kubernetes_tls_master, kubernetes_hosts: ['192.168.1.1'], kube_apiserver: 192.168.1.1, kubernetes_version: 1.8.1, flannel_etcd_prefix: /kube-centos/network, pod_ip_range: 172.30.0.0/16, flannel_network_type: vxlan, etcd_servers: 'http://192.168.1.1:2379', service_ip_range: 10.254.0.0/16, cluster_dns: 10.254.0.2, cluster_domain: cluster.local, storage_backend: etcd2 }
 ```
 
 Post-install
