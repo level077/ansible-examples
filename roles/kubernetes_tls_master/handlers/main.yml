@@ -1,0 +1,16 @@
+---
+- name: restart kubernetes master
+  service: name={{ item }} state=restarted
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+
+- name: restart docker
+  service: name=docker state=restarted
+  
+- name: systemctl daemon-reload
+  shell: systemctl daemon-reload
+
+- name: restart calico-node
+  shell: systemctl restart calico-node

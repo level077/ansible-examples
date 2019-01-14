@@ -1,36 +1,44 @@
 Description
 ===========
-kubernetes_tls_master模块，带了kube-dns部署脚本kubedns-cm.yaml， kubedns-sa.yaml，kubedns-controller.yaml.sed，kubedns-svc.yaml.sed。该模块是自行创建需要的key，且开启RBAC。另外一个k8s_master是纯yum部署，版本更新不及时。
+kubernetes_tls_master模块，开启RBAC，calico网络，coredns
 
 Pre-install
 ===========
-* 下载cfssl，并放入ansible自定义的分发目录，如：/etc/ansible/packages/kubernetes
-* 下载对应的kubernetes.tar.gz(https://dl.k8s.io/v1.8.1/kubernetes.tar.gz)，解压后将相关应用(kubectl，kube-apiserver，kube-controller-manager，kube-scheduler，kubelet，kube-proxy)放入ansible目录：/etc/ansible/packages/kubernetes/1.8.1/
+* 下载cfssl，并放入files目录：files/
+* 下载对应的kubernetes.tar.gz(https://dl.k8s.io/v1.11.2/kubernetes.tar.gz)，解压后将相关应用(kubectl，kube-apiserver，kube-controller-manager，kube-scheduler，kubelet，kube-proxy)放入files目录：files/1.11.2/
 
 Args
 =============
-* kubernetes_hosts: kube-apiserver部署的机器IP，或者其他域名，用户https的域名验证
-* kube_apiserver: kube-apiserver的IP
-* kubernetes_version: kubenetes版本
-* flannel_etcd_prefix: flannel需要的网络配置etcd路径 
-* flannel_network_type: flannel网络类型，可以是vxlan，host-gw等
-* pod_ip_range: pod网段
-* state: present或者absent
-* etcd_servers: etcd服务地址，包含端口
-* service_ip_range: service网段 
-* cluster_dns: kube-dns service服务地址，service_ip_range中的IP
-* cluster_domain: kubernetes集群内的域名后缀
-* storage_backend: 使用etcd的v2或者v3协议，默认是etcd2
+* kubernetes_hosts: "192.168.1.1,192.168.1.2" #部署master的节点IP，会包含在生成的kube-apiserver证书中
+* kubernetes_cname: "test.com,foo.com"  #kube-apiserver证书中使用
+* kube_apiserver: "192.168.1.1" #只能指定一个IP
+* kubernetes_version: "1.11.2"   #二进制文件存放在file目录下对应的版本文件夹中
+* pod_ip_range: "172.30.0.0/16"
+* etcd_servers: "http://192.168.1.1:2379"  #http访问
+* service_ip_range: "10.254.0.0/16"
+* cluster_dns: "10.254.0.2"
+* cluster_domain: "cluster.local"
+* coredns_image: "coredns/coredns:1.1.3"
+* storage_backend: "etcd3"   #1.13版本开始只能使用etcd3, 之前版本可以选填etcd2
+* k8s_tls_master_state: present
+* kubernetes_cluster: new  #新部署的节点使用new，如果是重复部署或者是扩容，则使用exist，new状态下会重新生成证书
+* kubernetes_cluster_name: test  #全局唯一，避免证书错乱
+* calico_node_image: "calico/node:v3.1.3"
+* calico_cni_image: "calico/cni:v3.1.3"
+* calico_controllers_image: "calico/kube-controllers:v3.1.3"
+* docker_root_dir: "/var/lib/docker"   #docker的根目录
+* metrics_server_image: "google_containers/metrics-server-amd64:v0.2.1"
 
 Usage
 ===========
 ```
 roles:  
-- { role: kubernetes_tls_master, kubernetes_hosts: ['192.168.1.1'], kube_apiserver: 192.168.1.1, kubernetes_version: 1.8.1, flannel_etcd_prefix: /kube-centos/network, pod_ip_range: 172.30.0.0/16, flannel_network_type: vxlan, etcd_servers: 'http://192.168.1.1:2379', service_ip_range: 10.254.0.0/16, cluster_dns: 10.254.0.2, cluster_domain: cluster.local, storage_backend: etcd2 }
+- { role: kubernetes_tls_master }
 ```
 
 Post-install
 ===========
-* 待部node署完后，先执行kubectl get csr;kubectl certificate approve xxx，以便让node加入集群，才可进去后续的应用部署
-* 如果gcr.io被墙，可在node的/etc/hosts中绑定61.91.161.217 gcr.io
-* kube-dns部署文件在master的/usr/local/src下：kubedns-controller.yaml.sed，kubedns-svc.yaml.sed，kubedns-cm.yaml，kubedns-sa.yaml
+* ```kubectl get cs``` 查看master是否安装成功
+* kubernetes相关配置及证书在/etc/kubernetes目录
+* calico相关配置在/etc/calico目录
+* coredns及其他相关yaml文件在/usr/local/src目录

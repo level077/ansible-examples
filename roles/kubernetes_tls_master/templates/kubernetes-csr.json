@@ -1,9 +1,20 @@
 {
     "CN": "kubernetes",
     "hosts": [
-      {% for item in kubernetes_hosts %}
-"{{ item }}",
+      {% set hosts = kubernetes_hosts.split(",")%}
+      {% for item in hosts %}
+      {% if item|trim != "" %}
+"{{ item|trim }}",
+      {% endif %}
       {% endfor %}
+      {% if kubernetes_cname is defined %}
+      {% set cnames = kubernetes_cname.split(",") %}
+      {% for item in cnames %}
+      {% if item|trim != "" %}
+"{{ item|trim }}",
+      {% endif %}
+      {% endfor %}
+      {% endif %}
       "127.0.0.1",
       "10.254.0.1",
       "kubernetes",

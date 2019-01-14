@@ -1,0 +1,18 @@
+apiVersion: projectcalico.org/v3
+kind: IPPoolList
+items:
+- apiVersion: projectcalico.org/v3
+  kind: IPPool
+  metadata:
+    name: default-ipv4-ippool
+  spec:
+    cidr: {{ pod_ip_range }}
+    ipipMode: CrossSubnet
+    natOutgoing: true
+- apiVersion: projectcalico.org/v3
+  kind: IPPool
+  metadata:
+    name: default-ipv6-ippool
+  spec:
+    cidr: fd48:918:8374::/48
+    ipipMode: Never
