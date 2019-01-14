@@ -1,51 +1,92 @@
 ---
-- name: mkdir /etc/kubernetes
-  file: path=/etc/kubernetes state=directory
-  tags: k8s_tls_node
-
-- name: delete dir /etc/kubernetes/ssl
-  file: path=/etc/kubernetes/ssl state=absent
-  tags: k8s_tls_node
-
-- name: mkdir /etc/kubernetes/ssl
+- name: mkdir /etc/kubernetes/ssl /etc/kubernetes/manifests
   file: path=/etc/kubernetes/ssl state=directory
-  tags: k8s_tls_node
-
-- name: yum install docker flannel
-  yum: name={{ item }} state=present
   with_items:
-  - docker
-  - flannel
+  - /etc/kubernetes/manifests
+  - /etc/kubernetes/ssl
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
-- name: change docker to use overlayfs storage driver and config flanneld
+- name: yum install conntrack ipset
+  yum: name=conntrack,ipset,ipvsadm state=present
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: modoprobe ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh nf_conntrack_ipv4
+  modprobe: name={{ item }} state=present
+  with_items:
+  - ip_vs
+  - ip_vs_rr
+  - ip_vs_wrr
+  - ip_vs_sh
+  - nf_conntrack_ipv4
+  - overlay
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: install docker
+  yum: name=docker state=present
+  tags: k8s_tls_node
+
+- name: template docker-storage
   template: src={{ item }} dest=/etc/sysconfig
   with_items:
   - docker-storage
-  - flanneld
-  tags: k8s_tls_node 
+  notify:
+  - restart docker
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
 
-- name: modprobe overlay
-  shell: modprobe overlay
+- name: mkdir {{ docker_root_dir }}
+  file: path={{ docker_root_dir }} state=directory
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: template docker.service
+  template: src=docker.service dest=/usr/lib/systemd/system
+  notify:
+  - systemctl daemon-reload
+  - restart docker
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: mkdir /etc/calico
+  file: path=/etc/calico state=directory
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: deploy calicoctl.cfg
+  template: src={{ item }} dest=/etc/calico
+  with_items:
+  - calicoctl.cfg
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: rsync calicoctl to /usr/bin
+  synchronize: src=calicoctl dest=/usr/bin
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: rsync bootstrap.kubeconfig kube-proxy.kubeconfig
-  synchronize: src=/root/ssl/{{ item }} dest=/etc/kubernetes
+  synchronize: src=/root/ssl/{{ kubernetes_cluster_name }}/{{ item }} dest=/etc/kubernetes
   with_items:
   - bootstrap.kubeconfig
   - kube-proxy.kubeconfig
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: delete kubelet.kubeconfig
   file: path=/etc/kubernetes/kubelet.kubeconfig state=absent
+  when: k8s_tls_node_state != "absent" and kubernetes_cluster == "new"
   tags: k8s_tls_node
 
 - name: rsync kubectl kubelet kube-proxy
-  synchronize: src={{ package_path }}/kubernetes/{{ kubernetes_version }}/{{ item }} dest=/usr/bin
+  synchronize: src={{ kubernetes_version }}/{{ item }} dest=/usr/bin
   with_items:
   - kubectl
   - kubelet
   - kube-proxy
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: deploy kubelet kube-proxy config
@@ -54,60 +95,91 @@
   - config
   - kubelet
   - proxy
-  tags: k8s_tls_node  
+  - kubelet.config
+  notify:
+  - restart kubelet
+  - restart kube-proxy
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
 
 - name: deploy kubelet kube-proxy service
   template: src={{ item }} dest=/usr/lib/systemd/system
   with_items:
   - kubelet.service
   - kube-proxy.service
-  tags: k8s_tls_node
-
-- name: systemctl enable kubelet kube-proxy
-  shell: systemctl enable {{ item }}
-  with_items:
-  - kubelet
-  - kube-proxy
+  notify:
+  - systemctl daemon-reload
+  - restart kubelet
+  - restart kube-proxy
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: disable selinux
   command: setenforce 0
-  ignore_errors: true
+  ignore_errors: True
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: disable firewalld
-  command: systemctl disable firewalld
-  tags: k8s_tls_node
-
-- name: stop firewalld
   command: systemctl stop firewalld
+  ignore_errors: True
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: stop swap
   shell: swapoff -a
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: swapoff add to /etc/rc.local
+  lineinfile: path=/etc/rc.d/rc.local line={{ item }} state=present mode=0755
+  with_items:
+  - 'swapoff -a'
+  - 'ip link set docker0 promisc on'
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: mkdir {{ kubelet_root_dir }}
+  file: path={{ kubelet_root_dir }} state=directory
+  when: k8s_tls_node_state != "absent"
+  tags: k8s_tls_node
+
+- name: systemctl start docker kubelet kube-proxy
+  service: name={{ item }} enabled=yes state=started
+  with_items:
+  - docker
+  - kubelet
+  - kube-proxy
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
 - name: set docker0 promisc on
   shell: ip link set docker0 promisc on
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
-- name: swapoff add to /etc/rc.local
-  lineinfile: path=/etc/rc.local line='swapoff -a' state=present
+- name: set iptables forward policy ACCEPT
+  shell: iptables -P FORWARD ACCEPT
+  when: k8s_tls_node_state != "absent"
   tags: k8s_tls_node
 
-- name: set docker0 promisc on to /etc/rc.local
-  lineinfile: path=/etc/rc.local line='ip link set docker0 promisc on' state=present
-  tags: k8s_tls_node
-
-- name: mkdir kubelet working directory /var/lib/kubelet
-  file: path=/var/lib/kubelet state=directory
-  tags: k8s_tls_node
-
-- name: systemctl start flanneld docker kubelet kube-proxy
-  shell: systemctl restart {{ item }}
+- name: stop docker kubelet kube-proxy
+  service: name={{ item }} state=stopped enabled=no
   with_items:
-  - flanneld
   - docker
   - kubelet
   - kube-proxy
+  ignore_errors: True
+  when: k8s_tls_node_state == "absent"
+  tags: k8s_tls_node
+
+- name: rm docker kubelet kube-proxy
+  file: path={{ item }} state=absent
+  with_items:
+  - /usr/bin/kubelet
+  - /usr/bin/kube-proxy
+  - /usr/lib/systemd/system/kubelet.service
+  - /usr/lib/systemd/system/kube-proxy.service
+  - /etc/kubernetes
+  when: k8s_tls_node_state == "absent"
   tags: k8s_tls_node

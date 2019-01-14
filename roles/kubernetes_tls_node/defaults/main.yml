@@ -1,0 +1,11 @@
+---
+kubernetes_version: 1.11.2
+etcd_servers: 'http://192.168.1.1:2379'
+cluster_dns: 10.254.0.2
+cluster_domain: cluster.local
+k8s_tls_node_state: present
+docker_root_dir: "/var/lib/docker"
+kubernetes_cluster_name: test
+kubernetes_cluster: new   #新节点部署使用new，重装使用exist。
+kubelet_root_dir: "/var/lib/kubelet"
+pause_image: "google_containers/pause-amd64.3.0:latest"

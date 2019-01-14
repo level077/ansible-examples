@@ -1,0 +1,12 @@
+---
+- name: systemctl daemon-reload
+  shell: systemctl daemon-reload
+
+- name: restart docker
+  shell: systemctl restart docker
+
+- name: restart kubelet
+  shell: systemctl restart kubelet
+
+- name: restart kube-proxy
+  shell: systemctl restart kube-proxy

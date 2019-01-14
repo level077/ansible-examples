@@ -1,1 +1,1 @@
-KUBE_PROXY_ARGS="--bind-address=0.0.0.0 --hostname-override={{ ansible_ssh_host }} --kubeconfig=/etc/kubernetes/kube-proxy.kubeconfig"
+KUBE_PROXY_ARGS="--bind-address=0.0.0.0 --hostname-override={{ ansible_host }} --kubeconfig=/etc/kubernetes/kube-proxy.kubeconfig --proxy-mode=ipvs"
