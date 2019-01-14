@@ -5,7 +5,7 @@ kubernetes_tls_master模块，开启RBAC，calico网络，coredns
 Pre-install
 ===========
 * 下载cfssl，并放入files目录：files/
-* 下载对应的kubernetes.tar.gz(https://dl.k8s.io/v1.11.2/kubernetes.tar.gz)，  解压后将相关应用(kubectl，kube-apiserver，kube-controller-manager，kube-scheduler，kubelet，kube-proxy)放入files目录：files/1.11.2/
+* 下载对应的kubernetes.tar.gz( https://dl.k8s.io/v1.11.2/kubernetes.tar.gz )，解压后将相关应用(kubectl，kube-apiserver，kube-controller-manager，kube-scheduler，kubelet，kube-proxy)放入files目录：files/1.11.2/
 
 Args
 =============
